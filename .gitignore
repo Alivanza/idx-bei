@@ -58,3 +58,19 @@ Thumbs.db
 .claude/
 .deprecated/
 CLAUDE.md
+
+# --- Daily screener automation ---
+# Un-ignore the rolling data so GitHub Actions can commit it back each day and
+# persist the 20-day window between scheduled runs (ephemeral runners otherwise
+# start from nothing every time).
+!data/timeseries/
+!data/timeseries/**
+!data/parquet/
+!data/parquet/**
+
+# Never commit your real secret / webapp URL -- GitHub Actions uses repo
+# Secrets instead. config.example.json (the blank template) is fine to keep.
+python/config.json
+
+# Stray download folder, not part of the project
+Claude outputs/
