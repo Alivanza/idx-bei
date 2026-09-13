@@ -1,0 +1,95 @@
+name: One-Time Historical Backfill
+
+# Manual only -- never runs on a schedule, only when you click "Run workflow" in the
+# Actions tab. Separate from daily-screen.yml (the recurring live job) on purpose: this
+# reads the already-backfilled data/parquet/ files committed to the repo and POSTs each
+# historical day's screen result straight to Screen_Log via the same Apps Script Web App
+# the daily job uses. It never touches idx daily/backfill/parquet and never commits
+# anything back -- read-only against the repo, write-only against the Sheet.
+#
+# Prerequisite: your local backfilled data/parquet/*.parquet (stock_summary.parquet in
+# particular) must be committed and pushed to this repo first -- see the README note in
+# backfill_screen_log.py's docstring, or just:
+#   git add data/parquet/ python/daily_screen.py python/backfill_screen_log.py
+#   git commit -m "Backfill: full historical stock_summary.parquet + sector-breakdown fix"
+#   git push
+#
+# Defaults to --dry-run=true so a first "Run workflow" click with no changes is a safe
+# smoke test (computes and prints, posts nothing) -- flip the dry_run input to false for
+# the real run once that looks right.
+
+on:
+  workflow_dispatch:
+    inputs:
+      start_date:
+        description: "Start date YYYY-MM-DD (optional -- default: earliest on file)"
+        required: false
+        default: ""
+      end_date:
+        description: "End date YYYY-MM-DD (optional -- default: latest on file)"
+        required: false
+        default: ""
+      batch_size:
+        description: "Days per POST batch (keeps each Apps Script call short)"
+        required: false
+        default: "30"
+      dry_run:
+        description: "Dry run -- compute and print, but don't POST"
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+permissions:
+  contents: read   # read-only -- this job never commits anything back
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60   # generous margin; expect well under 30 min based on local benchmarking
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Install dependencies
+        working-directory: python
+        run: $HOME/.local/bin/uv sync
+
+      - name: Verify backfilled data is present
+        working-directory: python
+        run: |
+          test -f ../data/parquet/stock_summary.parquet || {
+            echo "ERROR: data/parquet/stock_summary.parquet not found in the checked-out repo.";
+            echo "Push your locally backfilled data/parquet/ folder first -- see this workflow's header comment.";
+            exit 1;
+          }
+          $HOME/.local/bin/uv run python -c "
+          import pandas as pd
+          df = pd.read_parquet('../data/parquet/stock_summary.parquet')
+          print(f'{len(df)} rows, {df[\"Date\"].nunique()} trading days, '
+                f'{df[\"Date\"].min().date()} -> {df[\"Date\"].max().date()}')
+          "
+
+      - name: Run historical backfill
+        working-directory: python
+        env:
+          WEBAPP_URL: ${{ secrets.WEBAPP_URL }}
+          SHARED_SECRET: ${{ secrets.SHARED_SECRET }}
+        run: |
+          ARGS="--batch-size ${{ github.event.inputs.batch_size }}"
+          if [ -n "${{ github.event.inputs.start_date }}" ]; then
+            ARGS="$ARGS --start ${{ github.event.inputs.start_date }}"
+          fi
+          if [ -n "${{ github.event.inputs.end_date }}" ]; then
+            ARGS="$ARGS --end ${{ github.event.inputs.end_date }}"
+          fi
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          echo "Running: python backfill_screen_log.py $ARGS"
+          $HOME/.local/bin/uv run python backfill_screen_log.py $ARGS
