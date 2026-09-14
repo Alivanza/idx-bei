@@ -64,7 +64,12 @@ def post_bulk(cfg, runs):
     bulk = {"secret": cfg.get("shared_secret", ""), "mode": "backfill", "runs": runs}
     data = json.dumps(bulk).encode("utf-8")
     req = urllib.request.Request(cfg["webapp_url"], data=data, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=180) as resp:
+    # 420s: safely above Apps Script's own ~360s (6 min) execution cap, so a genuinely slow
+    # (but still-running) doPost call isn't cut off client-side before Apps Script itself
+    # would time out. Was 180s -- too short once Screen_Log grew large enough that
+    # appendToLogBulk()'s one-time full-column read (or, before that fix, appendToLog()'s
+    # per-day scans) pushed a single batch's Apps Script processing time past it.
+    with urllib.request.urlopen(req, timeout=420) as resp:
         return resp.status, resp.read().decode("utf-8")
 
 
