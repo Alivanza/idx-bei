@@ -533,13 +533,21 @@ function buildLiveWatchTab(ss) {
     var ticker = "Latest_Top8!C" + lt8Row;
     var name = "Latest_Top8!D" + lt8Row;
     var screenPrice = "Latest_Top8!F" + lt8Row;
+    // NB: argument separator is ";" here, not ",". This Sheet's locale (Indonesia) uses a
+    // comma as the DECIMAL separator, so Sheets expects ";" between function arguments
+    // (same reason an Indonesian-locale sheet writes SUM(A1;A2) instead of SUM(A1,A2)).
+    // A comma-separated formula written by a script still parses as literal text against
+    // this locale's grammar and every cell shows #ERROR! -- this bit us once already
+    // (every column erroring uniformly, including ones with no GOOGLEFINANCE call, was
+    // the tell: a parse failure, not a data/coverage issue). Keep semicolons if you ever
+    // add formulas to this tab.
     formulas.push([
-      "=IFERROR(IF(" + ticker + "=\"\",\"\"," + ticker + "),\"\")",
-      "=IFERROR(IF(" + ticker + "=\"\",\"\"," + name + "),\"\")",
-      "=IFERROR(IF(" + ticker + "=\"\",\"\"," + screenPrice + "),\"\")",
-      "=IF(A" + r + "=\"\",\"\",IFERROR(GOOGLEFINANCE(\"IDX:\"&A" + r + ",\"price\"),\"No data\"))",
-      "=IF(OR(A" + r + "=\"\",NOT(ISNUMBER(D" + r + ")),C" + r + "=0),\"\",(D" + r + "-C" + r + ")/C" + r + ")",
-      "=IF(OR(A" + r + "=\"\",NOT(ISNUMBER(D" + r + "))),\"\",IFERROR(GOOGLEFINANCE(\"IDX:\"&A" + r + ",\"changepct\")/100,\"\"))",
+      "=IFERROR(IF(" + ticker + "=\"\";\"\";" + ticker + ");\"\")",
+      "=IFERROR(IF(" + ticker + "=\"\";\"\";" + name + ");\"\")",
+      "=IFERROR(IF(" + ticker + "=\"\";\"\";" + screenPrice + ");\"\")",
+      "=IF(A" + r + "=\"\";\"\";IFERROR(GOOGLEFINANCE(\"IDX:\"&A" + r + ";\"price\");\"No data\"))",
+      "=IF(OR(A" + r + "=\"\";NOT(ISNUMBER(D" + r + "));C" + r + "=0);\"\";(D" + r + "-C" + r + ")/C" + r + ")",
+      "=IF(OR(A" + r + "=\"\";NOT(ISNUMBER(D" + r + ")));\"\";IFERROR(GOOGLEFINANCE(\"IDX:\"&A" + r + ";\"changepct\")/100;\"\"))",
     ]);
   }
   var range = sh.getRange(startRow, 1, LIVE_WATCH_MAX_ROWS, headers.length);
