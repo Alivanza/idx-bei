@@ -43,6 +43,10 @@ var TOP_HEADERS = ["RunDate", "LastTradingDate", "Ticker", "Name", "Sector", "La
 var ALLPASSERS_HEADERS = ["RunDate", "LastTradingDate", "Ticker", "Name", "Sector", "LastPrice",
                            "ADTV20", "ATR14_pct", "DistToHigh20", "ATRsBelowHigh", "BreakoutLast3",
                            "IncludedInShortlist"];
+var ALLTICKERS_HEADERS = ["RunDate", "LastTradingDate", "Ticker", "Name", "Sector", "LastPrice",
+                           "ADTV20", "ATR14_pct", "DistToHigh20", "ATRsBelowHigh", "BreakoutLast3",
+                           "F1_Liquidity", "F2_PriceRange", "F3_VolMomentum", "F4_NotZeroTradeFlag",
+                           "F5_NoPendingCA", "PassesAll", "IncludedInShortlist"];
 var SECTOR_HEADERS = ["RunDate", "Sector", "Universe", "Passed", "Shortlisted", "PassRate"];
 var NEARMISS_HEADERS = ["RunDate", "Ticker", "Name", "ADTV20", "FailedFilters"];
 
@@ -80,6 +84,7 @@ function doPost(e) {
   writeLatestTop8(ss, body);
   appendToLog(ss, body);
   writeAllPassers(ss, body);
+  writeAllTickers(ss, body); // full universe, pass+fail -- see its own comment; live-run only
   writeSectorBreakdown(ss, body);
   writeNearMisses(ss, body);
   writeMeta(ss, body);
@@ -266,6 +271,41 @@ function writeAllPassers(ss, body) {
     borderRange(sh.getRange(2, 1, rows.length, ALLPASSERS_HEADERS.length));
   }
   sh.setColumnWidths(1, ALLPASSERS_HEADERS.length, 105);
+  sh.setColumnWidth(4, 200); // Name
+  sh.setColumnWidth(5, 160); // Sector
+}
+
+// Every ticker in today's universe (~950-980), pass or fail, with each of the 5 filters'
+// individual TRUE/FALSE outcome plus PassesAll -- lets you see WHY a specific ticker isn't
+// in All_Passers or Latest_Top8, not just that it isn't. body.all_tickers is only set by
+// daily_screen.py's LIVE path (build_payload only attaches it when source=="Live") --
+// backfill_screen_log.py never sends this field, and backfill mode never calls this
+// function at all (see doPost's mode==="backfill" branch), so this tab simply holds
+// whatever the last live run wrote through a backfill, same as Latest_Top8/All_Passers.
+function writeAllTickers(ss, body) {
+  var sh = getOrCreateSheet(ss, "All_Tickers");
+  sh.clear();
+  sh.getRange(1, 1, 1, ALLTICKERS_HEADERS.length).setValues([ALLTICKERS_HEADERS]);
+  styleHeaderRow(sh, ALLTICKERS_HEADERS.length);
+
+  var rows = (body.all_tickers || []).map(function (r) {
+    return [body.run_date, body.last_trading_date, r.Ticker, r.Name, r.Sector, r.LastPrice,
+            r.ADTV20, r.ATR14_pct, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3,
+            r.F1_Liquidity, r.F2_PriceRange, r.F3_VolMomentum, r.F4_NotZeroTradeFlag,
+            r.F5_NoPendingCA, r.PassesAll, r.IncludedInShortlist];
+  });
+  if (rows.length) {
+    sh.getRange(2, 1, rows.length, ALLTICKERS_HEADERS.length).setValues(rows);
+    sh.getRange(2, 1, rows.length, 1).setNumberFormat("yyyy-mm-dd");   // RunDate
+    sh.getRange(2, 2, rows.length, 1).setNumberFormat("yyyy-mm-dd");   // LastTradingDate
+    sh.getRange(2, 6, rows.length, 1).setNumberFormat("#,##0");        // LastPrice
+    sh.getRange(2, 7, rows.length, 1).setNumberFormat("#,##0");        // ADTV20
+    sh.getRange(2, 8, rows.length, 1).setNumberFormat("0.00%");        // ATR14_pct
+    sh.getRange(2, 9, rows.length, 1).setNumberFormat("0.00%");        // DistToHigh20
+    sh.getRange(2, 10, rows.length, 1).setNumberFormat("0.00");        // ATRsBelowHigh
+    borderRange(sh.getRange(2, 1, rows.length, ALLTICKERS_HEADERS.length));
+  }
+  sh.setColumnWidths(1, ALLTICKERS_HEADERS.length, 105);
   sh.setColumnWidth(4, 200); // Name
   sh.setColumnWidth(5, 160); // Sector
 }
@@ -465,6 +505,7 @@ function buildGuideTab(ss) {
     ["Latest_Top8", "Today's shortlist: All_Passers ranked by ATRsBelowHigh/ATR14_pct and capped at 2 per sector (see section 3). Row count varies day to day -- it is no longer fixed at 8. Overwritten every run.", "", ""],
     ["Screen_Log", "Running history: each day's Latest_Top8 shortlist is appended here, keyed by LastTradingDate. Re-running the same trading day's screen replaces that day's block instead of duplicating it. Can include one-time historical rows from backfill_screen_log.py -- check the Source column ('Live' vs 'Backfill') before treating this as a clean backtest series.", "", ""],
     ["All_Passers", "EVERY ticker that passed all 5 filters today (e.g. all 50 on a high-pass day), with Sector and an IncludedInShortlist flag. Overwritten every run.", "", ""],
+    ["All_Tickers", "The FULL universe (~950-980 tickers), pass or fail, with each of the 5 filters' individual TRUE/FALSE outcome plus PassesAll -- use this to see exactly why a specific ticker isn't in All_Passers or Latest_Top8. Live-run only, same as All_Passers -- untouched by backfill_screen_log.py. Overwritten every run.", "", ""],
     ["Sector_Breakdown", "Per-sector counts for today: universe size, how many passed, how many made the shortlist, and the pass rate. Overwritten every run.", "", ""],
     ["Near_Misses", "Tickers that failed exactly one filter, up to 10, sorted by ADTV20 (a deliberate exception to section 3 -- these failed, so ADTV20 isn't restating a gate they passed). Always populated now, not just on low-pass days.", "", ""],
     ["Run_Info", "Last run timestamp, universe size, pass count, shortlist size, and this run's specific data-quality caveats.", "", ""],

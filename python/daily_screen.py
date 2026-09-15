@@ -292,6 +292,31 @@ def to_all_passers_records(passers_df):
     return out
 
 
+def to_all_tickers_records(df, shortlist_tickers):
+    """Every ticker in the day's universe (~950-980), pass or fail, with each of the 5
+    filters' individual TRUE/FALSE outcome -- lets you see WHY a name isn't in
+    All_Passers/Latest_Top8, not just that it isn't. Live-run only (see build_payload):
+    backfill_screen_log.py already posts 30+ days per HTTP call, and a ~980-row universe
+    per day would balloon that payload for no benefit -- nothing reads a historical
+    per-ticker universe today, only the shortlist (Screen_Log)."""
+    out = []
+    for _, r in df.iterrows():
+        out.append(dict(
+            Ticker=r["Ticker"], Name=r.get("Name", ""), Sector=r.get("Sector", "Unclassified"),
+            LastPrice=r["LastPrice"],
+            ADTV20=r["ADTV20"] if pd.notna(r["ADTV20"]) else None,
+            ATR14_pct=round(r["ATR14_pct"], 4) if pd.notna(r["ATR14_pct"]) else None,
+            DistToHigh20=round(r["DistToHigh20"], 4) if pd.notna(r["DistToHigh20"]) else None,
+            ATRsBelowHigh=round(r["ATRsBelowHigh"], 3) if pd.notna(r["ATRsBelowHigh"]) else None,
+            BreakoutLast3=bool(r["BreakoutLast3"]),
+            F1_Liquidity=bool(r["F1_Liquidity"]), F2_PriceRange=bool(r["F2_PriceRange"]),
+            F3_VolMomentum=bool(r["F3_VolMomentum"]), F4_NotZeroTradeFlag=bool(r["F4_NotZeroTradeFlag"]),
+            F5_NoPendingCA=bool(r["F5_NoPendingCA"]), PassesAll=bool(r["PassesAll"]),
+            IncludedInShortlist=bool(r["Ticker"] in shortlist_tickers),
+        ))
+    return out
+
+
 def failed_filters(row):
     names = {"F1_Liquidity": "Liquidity", "F2_PriceRange": "Price range", "F3_VolMomentum": "Vol+Momentum",
              "F4_NotZeroTradeFlag": "Not zero-trade(possible suspension)", "F5_NoPendingCA": "No pending CA"}
@@ -307,7 +332,7 @@ def build_payload(cfg, as_of_date=None, run_date=None, source="Live"):
     df, shortlist, all_passers, near_misses = r["df"], r["shortlist"], r["all_passers"], r["near_misses"]
     run_date = run_date or datetime.date.today().isoformat()
 
-    return {
+    payload = {
         "secret": cfg.get("shared_secret", ""),
         "run_date": run_date,
         "last_trading_date": pd.Timestamp(r["last_date"]).date().isoformat(),
@@ -327,6 +352,12 @@ def build_payload(cfg, as_of_date=None, run_date=None, source="Live"):
         ] if len(near_misses) else [],
         "caveats": r["caveats"],
     }
+    # Full universe (pass + fail, with the reason) -- live-run only. See
+    # to_all_tickers_records()'s docstring for why backfill_screen_log.py skips this field
+    # entirely (it never sets source="Live") rather than sending an empty/huge version of it.
+    if source == "Live":
+        payload["all_tickers"] = to_all_tickers_records(df, set(shortlist["Ticker"]))
+    return payload
 
 
 def post_payload(cfg, payload):
