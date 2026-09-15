@@ -269,6 +269,7 @@ def to_shortlist_records(shortlist_df, source="Live"):
             Ticker=r["Ticker"], Name=r.get("Name", ""), Sector=r.get("Sector", "Unclassified"),
             LastPrice=r["LastPrice"], LotCost=r["LotCost"], ADTV20=r["ADTV20"],
             ATR14_pct=round(r["ATR14_pct"], 4) if pd.notna(r["ATR14_pct"]) else None,
+            High20=r["High20"] if pd.notna(r["High20"]) else None,  # the raw 20-day-high price DistToHigh20/ATRsBelowHigh are both computed from
             DistToHigh20=round(r["DistToHigh20"], 4) if pd.notna(r["DistToHigh20"]) else None,
             ATRsBelowHigh=round(r["ATRsBelowHigh"], 3) if pd.notna(r["ATRsBelowHigh"]) else None,
             BreakoutLast3=bool(r["BreakoutLast3"]),
@@ -284,6 +285,7 @@ def to_all_passers_records(passers_df):
             Ticker=r["Ticker"], Name=r.get("Name", ""), Sector=r.get("Sector", "Unclassified"),
             LastPrice=r["LastPrice"], ADTV20=r["ADTV20"],
             ATR14_pct=round(r["ATR14_pct"], 4) if pd.notna(r["ATR14_pct"]) else None,
+            High20=r["High20"] if pd.notna(r["High20"]) else None,
             DistToHigh20=round(r["DistToHigh20"], 4) if pd.notna(r["DistToHigh20"]) else None,
             ATRsBelowHigh=round(r["ATRsBelowHigh"], 3) if pd.notna(r["ATRsBelowHigh"]) else None,
             BreakoutLast3=bool(r["BreakoutLast3"]),
@@ -306,6 +308,7 @@ def to_all_tickers_records(df, shortlist_tickers):
             LastPrice=r["LastPrice"],
             ADTV20=r["ADTV20"] if pd.notna(r["ADTV20"]) else None,
             ATR14_pct=round(r["ATR14_pct"], 4) if pd.notna(r["ATR14_pct"]) else None,
+            High20=r["High20"] if pd.notna(r["High20"]) else None,
             DistToHigh20=round(r["DistToHigh20"], 4) if pd.notna(r["DistToHigh20"]) else None,
             ATRsBelowHigh=round(r["ATRsBelowHigh"], 3) if pd.notna(r["ATRsBelowHigh"]) else None,
             BreakoutLast3=bool(r["BreakoutLast3"]),

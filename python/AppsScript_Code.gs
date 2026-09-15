@@ -4,7 +4,11 @@
  * SETUP:
  * 1. In your Google Sheet: Extensions > Apps Script.
  * 2. Delete whatever is in Code.gs and paste this whole file in.
- * 3. Change SHARED_SECRET below to the SAME string you put in config.json on your PC.
+ * 3. Set your shared secret as a SCRIPT PROPERTY, not in this source file: Project Settings
+ *    (gear icon, left sidebar) > Script Properties > Add script property > name it
+ *    SHARED_SECRET, value = the SAME string you put in config.json's "shared_secret" on
+ *    your PC. This keeps the actual secret out of this file (which is tracked in your git
+ *    repo) -- only the code that reads it lives here.
  * 4. Click Deploy > New deployment > select type "Web app".
  *    - Execute as: Me
  *    - Who has access: Anyone
@@ -27,7 +31,7 @@
  * (top toolbar, next to the bug icon), and click Run once. Everything else (the data
  * tabs) will pick up the new formatting automatically the next time doPost fires.
  *
- * LIVE_WATCH TAB: pulls a live(ish) price for each ticker currently in Latest_Top8 via
+ * LIVE_WATCH TAB: pulls a live(ish) price for each ticker currently in Shortlist via
  * the Sheets-native GOOGLEFINANCE() function -- NOT part of the Python/parquet pipeline,
  * purely spreadsheet formulas that recalculate on their own while the Sheet is open.
  * ~20 min delayed and not all smaller IDX tickers have data (GOOGLEFINANCE limitation,
@@ -36,15 +40,37 @@
  * you want to see it without waiting for the next scheduled run.
  */
 
-var SHARED_SECRET = "change-me-to-something-only-you-know"; // must match config.json
+// The secret itself lives in this script's Script Properties (see SETUP step 3 above), not
+// here in source -- this file is tracked in a git repo, and a hardcoded secret would end up
+// in that repo's history the moment it's committed. getSharedSecret() returns null if the
+// property was never set, which doPost() below treats as "reject everything" rather than
+// silently comparing against undefined.
+function getSharedSecret() {
+  return PropertiesService.getScriptProperties().getProperty("SHARED_SECRET");
+}
 
+// Renamed from "Latest_Top8": row count hasn't been a fixed 8 since the per-sector cap was
+// added (see Guide tab section 3) -- "Shortlist" describes what the tab actually holds.
+// LEGACY_SHORTLIST_TAB_NAME exists only so getShortlistSheet() (below) can rename the
+// existing tab in place on the first run after this update, instead of abandoning it and
+// creating an empty new one.
+var SHORTLIST_TAB_NAME = "Shortlist";
+var LEGACY_SHORTLIST_TAB_NAME = "Latest_Top8";
+
+// High20 sits between ATR14_pct and DistToHigh20 in every header list below: it's the raw
+// 20-day-high price (IDR) that DistToHigh20 and ATRsBelowHigh are both computed FROM
+// ((High20 - LastPrice)/High20 and (High20 - LastPrice)/ATR14 respectively) -- having the
+// input next to its two derived/normalized outputs is what you'd want to rebuild either by
+// hand. Inserting it shifts every column index after it by one in TOP_HEADERS,
+// ALLPASSERS_HEADERS and ALLTICKERS_HEADERS -- see the updated setNumberFormat column
+// indices in formatTop8Rows/writeAllPassers/writeAllTickers below, all changed to match.
 var TOP_HEADERS = ["RunDate", "LastTradingDate", "Ticker", "Name", "Sector", "LastPrice", "LotCost",
-                    "ADTV20", "ATR14_pct", "DistToHigh20", "ATRsBelowHigh", "BreakoutLast3", "Source"];
+                    "ADTV20", "ATR14_pct", "High20", "DistToHigh20", "ATRsBelowHigh", "BreakoutLast3", "Source"];
 var ALLPASSERS_HEADERS = ["RunDate", "LastTradingDate", "Ticker", "Name", "Sector", "LastPrice",
-                           "ADTV20", "ATR14_pct", "DistToHigh20", "ATRsBelowHigh", "BreakoutLast3",
+                           "ADTV20", "ATR14_pct", "High20", "DistToHigh20", "ATRsBelowHigh", "BreakoutLast3",
                            "IncludedInShortlist"];
 var ALLTICKERS_HEADERS = ["RunDate", "LastTradingDate", "Ticker", "Name", "Sector", "LastPrice",
-                           "ADTV20", "ATR14_pct", "DistToHigh20", "ATRsBelowHigh", "BreakoutLast3",
+                           "ADTV20", "ATR14_pct", "High20", "DistToHigh20", "ATRsBelowHigh", "BreakoutLast3",
                            "F1_Liquidity", "F2_PriceRange", "F3_VolMomentum", "F4_NotZeroTradeFlag",
                            "F5_NoPendingCA", "PassesAll", "IncludedInShortlist"];
 var SECTOR_HEADERS = ["RunDate", "Sector", "Universe", "Passed", "Shortlisted", "PassRate"];
@@ -64,14 +90,15 @@ function doPost(e) {
     return ContentService.createTextOutput("Bad JSON: " + err).setMimeType(ContentService.MimeType.TEXT);
   }
 
-  if (body.secret !== SHARED_SECRET) {
+  var expectedSecret = getSharedSecret();
+  if (!expectedSecret || body.secret !== expectedSecret) {
     return ContentService.createTextOutput("Forbidden: bad secret").setMimeType(ContentService.MimeType.TEXT);
   }
 
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
   // One-time historical pull (backfill_screen_log.py): a batch of past-day results, each
-  // shaped exactly like a normal daily body. Only Screen_Log is historical -- Latest_Top8 /
+  // shaped exactly like a normal daily body. Only Screen_Log is historical -- Shortlist /
   // All_Passers / Sector_Breakdown / Run_Info describe "right now" and are intentionally
   // left untouched here; the next real (Source="Live") doPost will populate those normally.
   if (body.mode === "backfill") {
@@ -89,7 +116,9 @@ function doPost(e) {
   writeNearMisses(ss, body);
   writeMeta(ss, body);
   buildGuideTab(ss); // static content, cheap to rebuild -- keeps it in sync with this script
-  buildLiveWatchTab(ss); // formulas only, re-pointed at today's Latest_Top8 rows each run
+  buildLiveWatchTab(ss); // formulas only, re-pointed at today's Shortlist rows each run
+  buildLiveWatchPassersTab(ss); // same idea, sourced from All_Passers instead
+  buildLiveWatchAllTickersTab(ss); // same idea again, capped to the top-250-by-ADTV20 of All_Tickers
 
   return ContentService.createTextOutput("OK").setMimeType(ContentService.MimeType.TEXT);
 }
@@ -98,6 +127,24 @@ function getOrCreateSheet(ss, name) {
   var sh = ss.getSheetByName(name);
   if (!sh) sh = ss.insertSheet(name);
   return sh;
+}
+
+// One-time migration for the Latest_Top8 -> Shortlist rename: if "Shortlist" doesn't exist
+// yet but the pre-rename "Latest_Top8" tab does, rename that tab in place rather than
+// creating a fresh "Shortlist" tab and leaving "Latest_Top8" behind as an orphaned, stale
+// duplicate -- this preserves the tab's position among the others and anything (a pinned
+// color, a link, a filter view) pointed at that same sheet object. After the first run
+// following this update, LEGACY_SHORTLIST_TAB_NAME no longer exists, so this is a no-op on
+// every later call.
+function getShortlistSheet(ss) {
+  var sh = ss.getSheetByName(SHORTLIST_TAB_NAME);
+  if (sh) return sh;
+  var legacy = ss.getSheetByName(LEGACY_SHORTLIST_TAB_NAME);
+  if (legacy) {
+    legacy.setName(SHORTLIST_TAB_NAME);
+    return legacy;
+  }
+  return ss.insertSheet(SHORTLIST_TAB_NAME);
 }
 
 // ---- Shared formatting helpers -------------------------------------------------
@@ -117,7 +164,7 @@ function borderRange(range) {
 
 // Column formats for the Top-8-style header layout:
 // RunDate, LastTradingDate, Ticker, Name, Sector, LastPrice, LotCost, ADTV20,
-// ATR14_pct, DistToHigh20, ATRsBelowHigh, BreakoutLast3
+// ATR14_pct, High20, DistToHigh20, ATRsBelowHigh, BreakoutLast3
 function formatTop8Rows(sh, startRow, numRows) {
   if (numRows <= 0) return;
   sh.getRange(startRow, 1, numRows, 1).setNumberFormat("yyyy-mm-dd");      // RunDate
@@ -126,22 +173,23 @@ function formatTop8Rows(sh, startRow, numRows) {
   sh.getRange(startRow, 7, numRows, 1).setNumberFormat("#,##0");           // LotCost (IDR)
   sh.getRange(startRow, 8, numRows, 1).setNumberFormat("#,##0");           // ADTV20 (IDR)
   sh.getRange(startRow, 9, numRows, 1).setNumberFormat("0.00%");           // ATR14_pct
-  sh.getRange(startRow, 10, numRows, 1).setNumberFormat("0.00%");          // DistToHigh20
-  sh.getRange(startRow, 11, numRows, 1).setNumberFormat("0.00");           // ATRsBelowHigh (in ATRs, not %)
+  sh.getRange(startRow, 10, numRows, 1).setNumberFormat("#,##0");          // High20 (IDR)
+  sh.getRange(startRow, 11, numRows, 1).setNumberFormat("0.00%");          // DistToHigh20
+  sh.getRange(startRow, 12, numRows, 1).setNumberFormat("0.00");           // ATRsBelowHigh (in ATRs, not %)
   borderRange(sh.getRange(startRow, 1, numRows, TOP_HEADERS.length));
 }
 
 // ---- Data tabs -------------------------------------------------------------------
 
 function writeLatestTop8(ss, body) {
-  var sh = getOrCreateSheet(ss, "Latest_Top8");
+  var sh = getShortlistSheet(ss);
   sh.clear();
   sh.getRange(1, 1, 1, TOP_HEADERS.length).setValues([TOP_HEADERS]);
   styleHeaderRow(sh, TOP_HEADERS.length);
 
   var rows = (body.top || []).map(function (r) {
     return [body.run_date, body.last_trading_date, r.Ticker, r.Name, r.Sector, r.LastPrice, r.LotCost,
-            r.ADTV20, r.ATR14_pct, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.Source || "Live"];
+            r.ADTV20, r.ATR14_pct, r.High20, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.Source || "Live"];
   });
   if (rows.length) {
     sh.getRange(2, 1, rows.length, TOP_HEADERS.length).setValues(rows);
@@ -183,7 +231,7 @@ function appendToLog(ss, body) {
   }
   var rows = (body.top || []).map(function (r) {
     return [body.run_date, body.last_trading_date, r.Ticker, r.Name, r.Sector, r.LastPrice, r.LotCost,
-            r.ADTV20, r.ATR14_pct, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.Source || "Live"];
+            r.ADTV20, r.ATR14_pct, r.High20, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.Source || "Live"];
   });
   if (rows.length) {
     var startRow = sh.getLastRow() + 1;
@@ -236,7 +284,7 @@ function appendToLogBulk(ss, runs) {
   runs.forEach(function (body) {
     (body.top || []).forEach(function (r) {
       allRows.push([body.run_date, body.last_trading_date, r.Ticker, r.Name, r.Sector, r.LastPrice, r.LotCost,
-                    r.ADTV20, r.ATR14_pct, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.Source || "Live"]);
+                    r.ADTV20, r.ATR14_pct, r.High20, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.Source || "Live"]);
     });
   });
   if (allRows.length) {
@@ -248,7 +296,7 @@ function appendToLogBulk(ss, runs) {
 
 // Every ticker that passed all 5 filters today (not just the sector-capped shortlist) --
 // answers "show me all 50" directly, with IncludedInShortlist marking which ones made
-// the capped Latest_Top8 / Screen_Log list.
+// the capped Shortlist / Screen_Log list.
 function writeAllPassers(ss, body) {
   var sh = getOrCreateSheet(ss, "All_Passers");
   sh.clear();
@@ -257,7 +305,7 @@ function writeAllPassers(ss, body) {
 
   var rows = (body.all_passers || []).map(function (r) {
     return [body.run_date, body.last_trading_date, r.Ticker, r.Name, r.Sector, r.LastPrice,
-            r.ADTV20, r.ATR14_pct, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.IncludedInShortlist];
+            r.ADTV20, r.ATR14_pct, r.High20, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.IncludedInShortlist];
   });
   if (rows.length) {
     sh.getRange(2, 1, rows.length, ALLPASSERS_HEADERS.length).setValues(rows);
@@ -266,8 +314,9 @@ function writeAllPassers(ss, body) {
     sh.getRange(2, 6, rows.length, 1).setNumberFormat("#,##0");        // LastPrice
     sh.getRange(2, 7, rows.length, 1).setNumberFormat("#,##0");        // ADTV20
     sh.getRange(2, 8, rows.length, 1).setNumberFormat("0.00%");        // ATR14_pct
-    sh.getRange(2, 9, rows.length, 1).setNumberFormat("0.00%");        // DistToHigh20
-    sh.getRange(2, 10, rows.length, 1).setNumberFormat("0.00");        // ATRsBelowHigh
+    sh.getRange(2, 9, rows.length, 1).setNumberFormat("#,##0");        // High20
+    sh.getRange(2, 10, rows.length, 1).setNumberFormat("0.00%");       // DistToHigh20
+    sh.getRange(2, 11, rows.length, 1).setNumberFormat("0.00");        // ATRsBelowHigh
     borderRange(sh.getRange(2, 1, rows.length, ALLPASSERS_HEADERS.length));
   }
   sh.setColumnWidths(1, ALLPASSERS_HEADERS.length, 105);
@@ -277,20 +326,29 @@ function writeAllPassers(ss, body) {
 
 // Every ticker in today's universe (~950-980), pass or fail, with each of the 5 filters'
 // individual TRUE/FALSE outcome plus PassesAll -- lets you see WHY a specific ticker isn't
-// in All_Passers or Latest_Top8, not just that it isn't. body.all_tickers is only set by
+// in All_Passers or Shortlist, not just that it isn't. body.all_tickers is only set by
 // daily_screen.py's LIVE path (build_payload only attaches it when source=="Live") --
 // backfill_screen_log.py never sends this field, and backfill mode never calls this
 // function at all (see doPost's mode==="backfill" branch), so this tab simply holds
-// whatever the last live run wrote through a backfill, same as Latest_Top8/All_Passers.
+// whatever the last live run wrote through a backfill, same as Shortlist/All_Passers.
 function writeAllTickers(ss, body) {
   var sh = getOrCreateSheet(ss, "All_Tickers");
   sh.clear();
   sh.getRange(1, 1, 1, ALLTICKERS_HEADERS.length).setValues([ALLTICKERS_HEADERS]);
   styleHeaderRow(sh, ALLTICKERS_HEADERS.length);
 
-  var rows = (body.all_tickers || []).map(function (r) {
+  // Sorted by ADTV20 descending (most liquid first), not left in whatever order Python sent.
+  // Two reasons: (1) it's a more useful default reading order for a ~950-980 row tab than an
+  // arbitrary/alphabetical one, and (2) buildLiveWatchAllTickersTab() below reads the first
+  // LIVE_WATCH_ALLTICKERS_MAX_ROWS rows of THIS tab to decide which tickers get a live
+  // GOOGLEFINANCE price -- sorting here is what makes "first N rows" equivalent to "top N by
+  // liquidity" without a second sort/lookup step in that function.
+  var allTickers = (body.all_tickers || []).slice().sort(function (a, b) {
+    return (b.ADTV20 || 0) - (a.ADTV20 || 0);
+  });
+  var rows = allTickers.map(function (r) {
     return [body.run_date, body.last_trading_date, r.Ticker, r.Name, r.Sector, r.LastPrice,
-            r.ADTV20, r.ATR14_pct, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3,
+            r.ADTV20, r.ATR14_pct, r.High20, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3,
             r.F1_Liquidity, r.F2_PriceRange, r.F3_VolMomentum, r.F4_NotZeroTradeFlag,
             r.F5_NoPendingCA, r.PassesAll, r.IncludedInShortlist];
   });
@@ -301,8 +359,9 @@ function writeAllTickers(ss, body) {
     sh.getRange(2, 6, rows.length, 1).setNumberFormat("#,##0");        // LastPrice
     sh.getRange(2, 7, rows.length, 1).setNumberFormat("#,##0");        // ADTV20
     sh.getRange(2, 8, rows.length, 1).setNumberFormat("0.00%");        // ATR14_pct
-    sh.getRange(2, 9, rows.length, 1).setNumberFormat("0.00%");        // DistToHigh20
-    sh.getRange(2, 10, rows.length, 1).setNumberFormat("0.00");        // ATRsBelowHigh
+    sh.getRange(2, 9, rows.length, 1).setNumberFormat("#,##0");        // High20
+    sh.getRange(2, 10, rows.length, 1).setNumberFormat("0.00%");       // DistToHigh20
+    sh.getRange(2, 11, rows.length, 1).setNumberFormat("0.00");        // ATRsBelowHigh
     borderRange(sh.getRange(2, 1, rows.length, ALLTICKERS_HEADERS.length));
   }
   sh.setColumnWidths(1, ALLTICKERS_HEADERS.length, 105);
@@ -362,7 +421,7 @@ function writeMeta(ss, body) {
   sh.getRange(2, 2).setValue(body.universe_count);
   sh.getRange(3, 1).setValue("Passed all 5 filters:");
   sh.getRange(3, 2).setValue(body.pass_count + "  (see All_Passers for the full list, Sector_Breakdown for counts by sector)");
-  sh.getRange(4, 1).setValue("In shortlist (Latest_Top8):");
+  sh.getRange(4, 1).setValue("In shortlist (Shortlist tab):");
   sh.getRange(4, 2).setValue((body.top || []).length + "  (max 2 per IDX-IC sector)");
   sh.getRange(5, 1).setValue("Caveats:");
   (body.caveats || []).forEach(function (c, i) {
@@ -435,11 +494,12 @@ function buildGuideTab(ss) {
     ["ADTV20", "Average Daily Traded Value over the last 20 sessions, in IDR. Used only to check the F1 liquidity gate -- not used to rank or sort the pass list.", "MEAN(Value) over the most recent 20 trading days.", ""],
     ["ATR14_pct", "14-day Average True Range, scaled to a % of LastPrice -- a volatility measure.",
       "TrueRange = MAX(High-Low, |High-PrevClose|, |Low-PrevClose|); ATR14 = MEAN(TrueRange) over 14 sessions; ATR14_pct = ATR14 / LastPrice.", ""],
-    ["DistToHigh20", "How far below the 20-day high LastPrice currently sits, as a %.", "(High20 − LastPrice) / High20, where High20 = MAX(High) over the last 20 sessions.", ""],
+    ["High20", "The 20-day-high price itself, in IDR -- the raw input DistToHigh20 and ATRsBelowHigh are both computed from. Shown so you can rebuild either by hand.", "MAX(High) over the last 20 trading sessions.", ""],
+    ["DistToHigh20", "How far below the 20-day high LastPrice currently sits, as a %.", "(High20 − LastPrice) / High20.", ""],
     ["ATRsBelowHigh", "Same idea as DistToHigh20, but scaled by the stock's OWN volatility instead of price -- a quality measure for a breakout. 0 or negative = at/above the high; 1.0 = pulled back one full average day's range.", "(High20 − LastPrice) / ATR14 (ATR14 in IDR, i.e. ATR14_pct × LastPrice).", ""],
     ["BreakoutLast3", "TRUE if a new 20-day high was set within the last 3 sessions.", "MAX(High) over the last 3 days > MAX(High) over the prior days 4–20.", ""],
-    ["IncludedInShortlist", "(All_Passers only) TRUE if this ticker survived the 2-per-sector cap into Latest_Top8 / Screen_Log.", "See section 3 below.", ""],
-    ["Source", "(Latest_Top8 / Screen_Log only) 'Live' = a real daily run; 'Backfill' = a one-time historical replay. Weight backtest conclusions accordingly -- Backfill rows have hindsight bias on F5/Sector (see caveats), Live rows don't.", "Set by daily_screen.py / backfill_screen_log.py.", ""],
+    ["IncludedInShortlist", "(All_Passers only) TRUE if this ticker survived the 2-per-sector cap into Shortlist / Screen_Log.", "See section 3 below.", ""],
+    ["Source", "(Shortlist / Screen_Log only) 'Live' = a real daily run; 'Backfill' = a one-time historical replay. Weight backtest conclusions accordingly -- Backfill rows have hindsight bias on F5/Sector (see caveats), Live rows don't.", "Set by daily_screen.py / backfill_screen_log.py.", ""],
   ];
   sh.getRange(row, 1, colDefs.length, 4).setValues(colDefs).setWrap(true).setVerticalAlignment("top");
   borderRange(sh.getRange(colDefStart - 1, 1, colDefs.length + 1, 4));
@@ -470,7 +530,7 @@ function buildGuideTab(ss) {
   row += filters.length + 2;
 
   // 3. Ranking & shortlist construction
-  writeSectionHeader(sh, row, "3. How the shortlist (Latest_Top8 / Screen_Log) is built from All_Passers", 4);
+  writeSectionHeader(sh, row, "3. How the shortlist (Shortlist / Screen_Log) is built from All_Passers", 4);
   row++;
   var rankStart = row;
   var rankSteps = [
@@ -502,14 +562,16 @@ function buildGuideTab(ss) {
   row++;
   var tabStart = row;
   var tabs = [
-    ["Latest_Top8", "Today's shortlist: All_Passers ranked by ATRsBelowHigh/ATR14_pct and capped at 2 per sector (see section 3). Row count varies day to day -- it is no longer fixed at 8. Overwritten every run.", "", ""],
-    ["Screen_Log", "Running history: each day's Latest_Top8 shortlist is appended here, keyed by LastTradingDate. Re-running the same trading day's screen replaces that day's block instead of duplicating it. Can include one-time historical rows from backfill_screen_log.py -- check the Source column ('Live' vs 'Backfill') before treating this as a clean backtest series.", "", ""],
+    ["Shortlist", "Today's shortlist (renamed from Latest_Top8 -- row count is no longer fixed at 8): All_Passers ranked by ATRsBelowHigh/ATR14_pct and capped at 2 per sector (see section 3). Row count varies day to day. Overwritten every run.", "", ""],
+    ["Screen_Log", "Running history: each day's Shortlist is appended here, keyed by LastTradingDate. Re-running the same trading day's screen replaces that day's block instead of duplicating it. Can include one-time historical rows from backfill_screen_log.py -- check the Source column ('Live' vs 'Backfill') before treating this as a clean backtest series.", "", ""],
     ["All_Passers", "EVERY ticker that passed all 5 filters today (e.g. all 50 on a high-pass day), with Sector and an IncludedInShortlist flag. Overwritten every run.", "", ""],
-    ["All_Tickers", "The FULL universe (~950-980 tickers), pass or fail, with each of the 5 filters' individual TRUE/FALSE outcome plus PassesAll -- use this to see exactly why a specific ticker isn't in All_Passers or Latest_Top8. Live-run only, same as All_Passers -- untouched by backfill_screen_log.py. Overwritten every run.", "", ""],
+    ["All_Tickers", "The FULL universe (~950-980 tickers), pass or fail, with each of the 5 filters' individual TRUE/FALSE outcome plus PassesAll -- use this to see exactly why a specific ticker isn't in All_Passers or Shortlist. Live-run only, same as All_Passers -- untouched by backfill_screen_log.py. Overwritten every run.", "", ""],
     ["Sector_Breakdown", "Per-sector counts for today: universe size, how many passed, how many made the shortlist, and the pass rate. Overwritten every run.", "", ""],
     ["Near_Misses", "Tickers that failed exactly one filter, up to 10, sorted by ADTV20 (a deliberate exception to section 3 -- these failed, so ADTV20 isn't restating a gate they passed). Always populated now, not just on low-pass days.", "", ""],
     ["Run_Info", "Last run timestamp, universe size, pass count, shortlist size, and this run's specific data-quality caveats.", "", ""],
-    ["Live_Watch", "Today's Latest_Top8 tickers with a live(ish) price via GOOGLEFINANCE (Sheets-native, not the Python pipeline) -- ~20 min delayed, and not every smaller IDX ticker has data. For gauging how far price has moved since the screen flagged it, not for order timing. Formulas only, no data of their own -- rebuilt every run, always current as long as the Sheet is open.", "", ""],
+    ["Live_Watch", "Today's Shortlist tickers with a live(ish) price via GOOGLEFINANCE (Sheets-native, not the Python pipeline) -- ~20 min delayed, and not every smaller IDX ticker has data. For gauging how far price has moved since the screen flagged it, not for order timing. Formulas only, no data of their own -- rebuilt every run, always current as long as the Sheet is open.", "", ""],
+    ["Live_Watch_Passers", "Same idea as Live_Watch, but sourced from All_Passers instead of Shortlist -- every ticker that passed all 5 filters today, not just the sector-capped shortlist. Provisioned for up to " + LIVE_WATCH_PASSERS_MAX_ROWS + " tickers.", "", ""],
+    ["Live_Watch_AllTickers", "Same idea again, but sourced from All_Tickers (the full ~950-980 universe) -- capped to the top " + LIVE_WATCH_ALLTICKERS_MAX_ROWS + " tickers by ADTV20 (liquidity), not the whole universe. That cap is a deliberate choice, not a technical wall: GOOGLEFINANCE has no documented limit on concurrent formulas per sheet, and Live_Watch + Live_Watch_Passers + a full-universe version would run roughly 2,700 of them at once with no track record at that scale. 250 was chosen as a liquidity-weighted middle ground; raise LIVE_WATCH_ALLTICKERS_MAX_ROWS in the script if you want more coverage and are willing to test the sheet at that size.", "", ""],
   ];
   sh.getRange(row, 1, tabs.length, 4).setValues(tabs).setWrap(true).setVerticalAlignment("top");
   borderRange(sh.getRange(tabStart - 1, 1, tabs.length + 1, 4));
@@ -535,22 +597,28 @@ function buildGuideTab(ss) {
   sh.setFrozenRows(0); // guide is read top-to-bottom, no need to freeze anything
 }
 
-// ---- Live_Watch tab ------------------------------------------------------------------
-// Formulas only -- no data written by this script. Each row's Ticker/Name/screen price
-// are pulled from Latest_Top8 by cell reference (same row number, so they track whatever
-// Latest_Top8 holds after writeLatestTop8() runs), and the live price / today's change
-// come from GOOGLEFINANCE, which recalculates on its own on a Sheets-managed cycle while
-// the Sheet is open -- this function does not need to run again for those to update.
-// Provisions LIVE_WATCH_MAX_ROWS rows regardless of today's actual shortlist size (theoretical
-// max is MAX_PER_SECTOR x number of IDX-IC sectors+Unclassified = 2 x 12 = 24 in daily_screen.py
-// as of this version) so it never silently truncates a large shortlist; rows beyond today's
-// shortlist size just show blank (IF(...="","",...) below).
-
-var LIVE_WATCH_MAX_ROWS = 30;
-
-function buildLiveWatchTab(ss) {
+// ---- Live_Watch tabs -----------------------------------------------------------------
+// Formulas only -- no data written by this script beyond the formula text itself. Each
+// row's Ticker/Name/screen price are pulled from a source tab by cell reference, and the
+// live price / today's change come from GOOGLEFINANCE, which recalculates on its own on a
+// Sheets-managed cycle while the Sheet is open -- this function does not need to run again
+// for those to update.
+//
+// Shared by two tabs because Shortlist and All_Passers both put Ticker/Name/LastPrice in
+// columns C/D/F with data starting row 2 -- the exact layout this engine assumes. Sharing
+// (instead of duplicating buildLiveWatchTab twice) means the semicolon-locale fix below
+// has exactly one place to go out of sync if it's ever touched again, not two.
+//
+// NB: argument separator is ";" throughout, not ",". This Sheet's locale (Indonesia) uses
+// a comma as the DECIMAL separator, so Sheets expects ";" between function arguments (same
+// reason an Indonesian-locale sheet writes SUM(A1;A2) instead of SUM(A1,A2)). A
+// comma-separated formula written by a script still parses as literal text against this
+// locale's grammar and every cell shows #ERROR! -- this bit us once already (every column
+// erroring uniformly, including ones with no GOOGLEFINANCE call, was the tell: a parse
+// failure, not a data/coverage issue). Keep semicolons if you ever add formulas here.
+function buildLiveWatchFromSource(ss, sourceTab, tabName, maxRows, capNote) {
   ss = ss || SpreadsheetApp.getActiveSpreadsheet(); // see buildGuideTab's comment on why
-  var sh = getOrCreateSheet(ss, "Live_Watch");
+  var sh = getOrCreateSheet(ss, tabName);
   sh.clear();
 
   var headers = ["Ticker", "Name", "Screen LastPrice (IDR)", "Live Price (IDR, ~20min delay)",
@@ -558,30 +626,25 @@ function buildLiveWatchTab(ss) {
   sh.getRange(1, 1, 1, headers.length).setValues([headers]);
   styleHeaderRow(sh, headers.length);
 
+  var tailNote = capNote ||
+    ("Rows beyond today's actual " + sourceTab + " row count just show blank.");
   sh.getRange(2, 1, 1, headers.length).merge()
-    .setValue("GOOGLEFINANCE (Sheets-native, not the Python pipeline): ~20 min delayed, and not every " +
-              "smaller/less-liquid IDX ticker has data (shows \"No data\" when GOOGLEFINANCE can't find it). " +
-              "Use this to gauge how far price has moved since the screen flagged it at LastTradingDate's " +
-              "close -- not as an order-timing or execution-price reference.")
+    .setValue("GOOGLEFINANCE (Sheets-native, not the Python pipeline), sourced from " + sourceTab + ": " +
+              "~20 min delayed, and not every smaller/less-liquid IDX ticker has data (shows \"No data\" " +
+              "when GOOGLEFINANCE can't find it). Use this to gauge how far price has moved since the " +
+              "screen flagged it at LastTradingDate's close -- not as an order-timing or execution-price " +
+              "reference. " + tailNote)
     .setFontStyle("italic").setWrap(true).setBackground(SECTION_BG);
   sh.setRowHeight(2, 40);
 
   var startRow = 3;
   var formulas = [];
-  for (var i = 0; i < LIVE_WATCH_MAX_ROWS; i++) {
-    var r = startRow + i;               // this Live_Watch row
-    var lt8Row = 2 + i;                 // corresponding Latest_Top8 row (its header is row 1 too)
-    var ticker = "Latest_Top8!C" + lt8Row;
-    var name = "Latest_Top8!D" + lt8Row;
-    var screenPrice = "Latest_Top8!F" + lt8Row;
-    // NB: argument separator is ";" here, not ",". This Sheet's locale (Indonesia) uses a
-    // comma as the DECIMAL separator, so Sheets expects ";" between function arguments
-    // (same reason an Indonesian-locale sheet writes SUM(A1;A2) instead of SUM(A1,A2)).
-    // A comma-separated formula written by a script still parses as literal text against
-    // this locale's grammar and every cell shows #ERROR! -- this bit us once already
-    // (every column erroring uniformly, including ones with no GOOGLEFINANCE call, was
-    // the tell: a parse failure, not a data/coverage issue). Keep semicolons if you ever
-    // add formulas to this tab.
+  for (var i = 0; i < maxRows; i++) {
+    var r = startRow + i;               // this Live_Watch* row
+    var srcRow = 2 + i;                 // corresponding sourceTab row (its header is row 1 too)
+    var ticker = sourceTab + "!C" + srcRow;
+    var name = sourceTab + "!D" + srcRow;
+    var screenPrice = sourceTab + "!F" + srcRow;
     formulas.push([
       "=IFERROR(IF(" + ticker + "=\"\";\"\";" + ticker + ");\"\")",
       "=IFERROR(IF(" + ticker + "=\"\";\"\";" + name + ");\"\")",
@@ -591,14 +654,14 @@ function buildLiveWatchTab(ss) {
       "=IF(OR(A" + r + "=\"\";NOT(ISNUMBER(D" + r + ")));\"\";IFERROR(GOOGLEFINANCE(\"IDX:\"&A" + r + ";\"changepct\")/100;\"\"))",
     ]);
   }
-  var range = sh.getRange(startRow, 1, LIVE_WATCH_MAX_ROWS, headers.length);
+  var range = sh.getRange(startRow, 1, maxRows, headers.length);
   range.setFormulas(formulas);
   range.setVerticalAlignment("middle");
-  sh.getRange(startRow, 3, LIVE_WATCH_MAX_ROWS, 1).setNumberFormat("#,##0");      // Screen LastPrice
-  sh.getRange(startRow, 4, LIVE_WATCH_MAX_ROWS, 1).setNumberFormat("#,##0");      // Live Price
-  sh.getRange(startRow, 5, LIVE_WATCH_MAX_ROWS, 1).setNumberFormat("0.00%");      // Change vs Screen
-  sh.getRange(startRow, 6, LIVE_WATCH_MAX_ROWS, 1).setNumberFormat("0.00%");      // Today's Change
-  borderRange(sh.getRange(1, 1, LIVE_WATCH_MAX_ROWS + startRow - 1, headers.length));
+  sh.getRange(startRow, 3, maxRows, 1).setNumberFormat("#,##0");      // Screen LastPrice
+  sh.getRange(startRow, 4, maxRows, 1).setNumberFormat("#,##0");      // Live Price
+  sh.getRange(startRow, 5, maxRows, 1).setNumberFormat("0.00%");      // Change vs Screen
+  sh.getRange(startRow, 6, maxRows, 1).setNumberFormat("0.00%");      // Today's Change
+  borderRange(sh.getRange(1, 1, maxRows + startRow - 1, headers.length));
 
   sh.setColumnWidth(1, 90);
   sh.setColumnWidth(2, 220);
@@ -607,4 +670,39 @@ function buildLiveWatchTab(ss) {
   sh.setColumnWidth(5, 120);
   sh.setColumnWidth(6, 140);
   sh.setFrozenRows(2);
+}
+
+// Provisions LIVE_WATCH_MAX_ROWS rows regardless of today's actual shortlist size (theoretical
+// max is MAX_PER_SECTOR x number of IDX-IC sectors+Unclassified = 2 x 12 = 24 in daily_screen.py
+// as of this version) so it never silently truncates a large shortlist; rows beyond today's
+// shortlist size just show blank (IF(...="","",...) above).
+var LIVE_WATCH_MAX_ROWS = 30;
+// All_Passers isn't sector-capped, so its row count runs higher and more variably than the
+// shortlist's -- observed pass_count has ranged from the teens to the 60s across live and
+// backfilled days. 100 gives headroom above that observed range; raise it if a day ever
+// actually fills all 100 rows (Run_Info's "Passed all 5 filters" count says whether it did).
+var LIVE_WATCH_PASSERS_MAX_ROWS = 100;
+// The full universe is ~950-980 tickers -- live-tracking all of them would add roughly 1,960
+// more concurrent GOOGLEFINANCE formulas on top of the ~780 Live_Watch + Live_Watch_Passers
+// already use, with no documented ceiling found on how many GOOGLEFINANCE calls a Sheet can
+// run concurrently before slowing down or erroring. Capped middle ground instead: only the
+// most-liquid 250 tickers by ADTV20 (writeAllTickers() sorts All_Tickers by ADTV20 descending
+// specifically so its first 250 rows ARE that top-250 set -- no separate sort needed here).
+// Raise/lower LIVE_WATCH_ALLTICKERS_MAX_ROWS if 250 turns out to be too many or too few.
+var LIVE_WATCH_ALLTICKERS_MAX_ROWS = 250;
+
+function buildLiveWatchTab(ss) {
+  buildLiveWatchFromSource(ss, SHORTLIST_TAB_NAME, "Live_Watch", LIVE_WATCH_MAX_ROWS);
+}
+
+function buildLiveWatchPassersTab(ss) {
+  buildLiveWatchFromSource(ss, "All_Passers", "Live_Watch_Passers", LIVE_WATCH_PASSERS_MAX_ROWS);
+}
+
+function buildLiveWatchAllTickersTab(ss) {
+  buildLiveWatchFromSource(ss, "All_Tickers", "Live_Watch_AllTickers", LIVE_WATCH_ALLTICKERS_MAX_ROWS,
+    "All_Tickers holds the full ~950-980 ticker universe, sorted by ADTV20 descending -- this tab " +
+    "only live-tracks the top " + LIVE_WATCH_ALLTICKERS_MAX_ROWS + " by that liquidity ranking, not " +
+    "every ticker (see Guide for why). A ticker missing here just isn't in the top " +
+    LIVE_WATCH_ALLTICKERS_MAX_ROWS + " today -- check All_Tickers directly for its filter results.");
 }
