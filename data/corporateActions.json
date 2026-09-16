@@ -1,5 +1,5 @@
 {
-  "totalRecordsAllTypes": 1372,
+  "totalRecordsAllTypes": 1426,
   "categories": {
     "tanpaHmetd": {
       "count": 77,
@@ -623,8 +623,1929 @@
       ]
     },
     "hmetd": {
-      "count": 0,
-      "data": []
+      "count": 240,
+      "data": [
+        {
+          "id": 82791,
+          "KodeEmiten": "BNBR",
+          "TanggalPencatatan": "2026-08-03T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 7191267439.0,
+          "JumlahSahamSetelahTindakan": 263336671587.0
+        },
+        {
+          "id": 82786,
+          "KodeEmiten": "PADI",
+          "TanggalPencatatan": "2026-07-31T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 521281290.0,
+          "JumlahSahamSetelahTindakan": 13568695829.0
+        },
+        {
+          "id": 82750,
+          "KodeEmiten": "COCO",
+          "TanggalPencatatan": "2026-07-28T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 505189568.0,
+          "JumlahSahamSetelahTindakan": 14237823696.0
+        },
+        {
+          "id": 82739,
+          "KodeEmiten": "ATIC",
+          "TanggalPencatatan": "2026-07-27T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 226609248.0,
+          "JumlahSahamSetelahTindakan": 2894201693.0
+        },
+        {
+          "id": 82741,
+          "KodeEmiten": "RMKO",
+          "TanggalPencatatan": "2026-07-27T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 8500.0,
+          "JumlahSahamSetelahTindakan": 1576720595.0
+        },
+        {
+          "id": 82727,
+          "KodeEmiten": "PEGE",
+          "TanggalPencatatan": "2026-07-24T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 64597637.0,
+          "JumlahSahamSetelahTindakan": 3777889408.0
+        },
+        {
+          "id": 82729,
+          "KodeEmiten": "CASH",
+          "TanggalPencatatan": "2026-07-24T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 246819118.0,
+          "JumlahSahamSetelahTindakan": 2427802216.0
+        },
+        {
+          "id": 82732,
+          "KodeEmiten": "SINI",
+          "TanggalPencatatan": "2026-07-24T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 10089024.0,
+          "JumlahSahamSetelahTindakan": 1202500000.0
+        },
+        {
+          "id": 82716,
+          "KodeEmiten": "ELPI",
+          "TanggalPencatatan": "2026-07-23T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 2066155.0,
+          "JumlahSahamSetelahTindakan": 9524420000.0
+        },
+        {
+          "id": 82717,
+          "KodeEmiten": "YOII",
+          "TanggalPencatatan": "2026-07-23T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 288543.0,
+          "JumlahSahamSetelahTindakan": 3926983181.0
+        },
+        {
+          "id": 82562,
+          "KodeEmiten": "MPPA",
+          "TanggalPencatatan": "2026-07-15T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 7567732645.0,
+          "JumlahSahamSetelahTindakan": 33828872408.0
+        },
+        {
+          "id": 82208,
+          "KodeEmiten": "BABY",
+          "TanggalPencatatan": "2026-05-13T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 10728861.0,
+          "JumlahSahamSetelahTindakan": 2854826582.0
+        },
+        {
+          "id": 60971,
+          "KodeEmiten": "GMFI",
+          "TanggalPencatatan": "2026-01-15T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1180281542.0,
+          "JumlahSahamSetelahTindakan": 124835258434.0
+        },
+        {
+          "id": 60621,
+          "KodeEmiten": "IMJS",
+          "TanggalPencatatan": "2025-12-23T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 15531334.0,
+          "JumlahSahamSetelahTindakan": 10849262500.0
+        },
+        {
+          "id": 60071,
+          "KodeEmiten": "BUVA",
+          "TanggalPencatatan": "2025-11-20T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 10978302.0,
+          "JumlahSahamSetelahTindakan": 24617054642.0
+        },
+        {
+          "id": 48570,
+          "KodeEmiten": "MINA",
+          "TanggalPencatatan": "2025-07-31T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 232224156.0,
+          "JumlahSahamSetelahTindakan": 9843750000.0
+        },
+        {
+          "id": 48366,
+          "KodeEmiten": "TOWR",
+          "TanggalPencatatan": "2025-07-24T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 7391464952.0,
+          "JumlahSahamSetelahTindakan": 59098103731.0
+        },
+        {
+          "id": 48376,
+          "KodeEmiten": "FILM",
+          "TanggalPencatatan": "2025-07-24T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 37187533.0,
+          "JumlahSahamSetelahTindakan": 10887566758.0
+        },
+        {
+          "id": 48307,
+          "KodeEmiten": "WIFI",
+          "TanggalPencatatan": "2025-07-21T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 220523902.0,
+          "JumlahSahamSetelahTindakan": 5308549015.0
+        },
+        {
+          "id": 48133,
+          "KodeEmiten": "FASW",
+          "TanggalPencatatan": "2025-07-10T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 148647151.0,
+          "JumlahSahamSetelahTindakan": 3221255423.0
+        },
+        {
+          "id": 48106,
+          "KodeEmiten": "LPCK",
+          "TanggalPencatatan": "2025-07-09T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 15156000.0,
+          "JumlahSahamSetelahTindakan": 5134685692.0
+        },
+        {
+          "id": 46987,
+          "KodeEmiten": "CCSI",
+          "TanggalPencatatan": "2025-03-18T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 14294926.0,
+          "JumlahSahamSetelahTindakan": 1333333331.0
+        },
+        {
+          "id": 23298,
+          "KodeEmiten": "BBYB",
+          "TanggalPencatatan": "2024-07-26T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 0.0,
+          "JumlahSahamSetelahTindakan": 0.0
+        },
+        {
+          "id": 23059,
+          "KodeEmiten": "TPMA",
+          "TanggalPencatatan": "2024-07-15T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 0.0,
+          "JumlahSahamSetelahTindakan": 0.0
+        },
+        {
+          "id": 23010,
+          "KodeEmiten": "FITT",
+          "TanggalPencatatan": "2024-07-12T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 0.0,
+          "JumlahSahamSetelahTindakan": 0.0
+        },
+        {
+          "id": 22875,
+          "KodeEmiten": "INCO",
+          "TanggalPencatatan": "2024-07-05T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 0.0,
+          "JumlahSahamSetelahTindakan": 0.0
+        },
+        {
+          "id": 22110,
+          "KodeEmiten": "SDRA",
+          "TanggalPencatatan": "2024-05-15T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 370.0,
+          "JumlahSahamSetelahTindakan": 0.0
+        },
+        {
+          "id": 21927,
+          "KodeEmiten": "WIKA",
+          "TanggalPencatatan": "2024-04-30T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 0.0,
+          "JumlahSahamSetelahTindakan": 0.0
+        },
+        {
+          "id": 21265,
+          "KodeEmiten": "BTPN",
+          "TanggalPencatatan": "2024-03-21T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 0.0,
+          "JumlahSahamSetelahTindakan": 0.0
+        },
+        {
+          "id": 20434,
+          "KodeEmiten": "MAYA",
+          "TanggalPencatatan": "2024-01-26T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 7189435011.0,
+          "JumlahSahamSetelahTindakan": 26049534041.0
+        },
+        {
+          "id": 20399,
+          "KodeEmiten": "PANR",
+          "TanggalPencatatan": "2024-01-25T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 3485032.0,
+          "JumlahSahamSetelahTindakan": 1387500000.0
+        },
+        {
+          "id": 20001,
+          "KodeEmiten": "BABP",
+          "TanggalPencatatan": "2024-01-04T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 10693253333.0,
+          "JumlahSahamSetelahTindakan": 44121331468.0
+        },
+        {
+          "id": 19217,
+          "KodeEmiten": "BMAS",
+          "TanggalPencatatan": "2023-11-20T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 0.0,
+          "JumlahSahamSetelahTindakan": 0.0
+        },
+        {
+          "id": 17908,
+          "KodeEmiten": "NOBU",
+          "TanggalPencatatan": "2023-08-28T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 716794700.0,
+          "JumlahSahamSetelahTindakan": 7425611110.0
+        },
+        {
+          "id": 17502,
+          "KodeEmiten": "WICO",
+          "TanggalPencatatan": "2023-07-31T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 38136954.0,
+          "JumlahSahamSetelahTindakan": 2393710348.0
+        },
+        {
+          "id": 17462,
+          "KodeEmiten": "SIPD",
+          "TanggalPencatatan": "2023-07-28T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 52593102.0,
+          "JumlahSahamSetelahTindakan": 1839102056.0
+        },
+        {
+          "id": 17481,
+          "KodeEmiten": "CSAP",
+          "TanggalPencatatan": "2023-07-28T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 38697305.0,
+          "JumlahSahamSetelahTindakan": 5683175151.0
+        },
+        {
+          "id": 17443,
+          "KodeEmiten": "PKPK",
+          "TanggalPencatatan": "2023-07-27T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 288953094.0,
+          "JumlahSahamSetelahTindakan": 1200000000.0
+        },
+        {
+          "id": 17385,
+          "KodeEmiten": "MIDI",
+          "TanggalPencatatan": "2023-07-25T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 12481300.0,
+          "JumlahSahamSetelahTindakan": 33435294800.0
+        },
+        {
+          "id": 16455,
+          "KodeEmiten": "TBLA",
+          "TanggalPencatatan": "2023-04-18T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 14784791.0,
+          "JumlahSahamSetelahTindakan": 5711988394.0
+        },
+        {
+          "id": 15849,
+          "KodeEmiten": "BKSL",
+          "TanggalPencatatan": "2023-02-21T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 30665429289.0,
+          "JumlahSahamSetelahTindakan": 167708902705.0
+        },
+        {
+          "id": 15676,
+          "KodeEmiten": "BPTR",
+          "TanggalPencatatan": "2023-02-08T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 14400097.0,
+          "JumlahSahamSetelahTindakan": 3534000000.0
+        },
+        {
+          "id": 15626,
+          "KodeEmiten": "PBRX",
+          "TanggalPencatatan": "2023-02-03T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1114376653.0,
+          "JumlahSahamSetelahTindakan": 21482028246.0
+        },
+        {
+          "id": 15590,
+          "KodeEmiten": "OASA",
+          "TanggalPencatatan": "2023-01-30T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 57218871.0,
+          "JumlahSahamSetelahTindakan": 6347220000.0
+        },
+        {
+          "id": 15479,
+          "KodeEmiten": "OMRE",
+          "TanggalPencatatan": "2023-01-17T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1005676218.0,
+          "JumlahSahamSetelahTindakan": 2945211000.0
+        },
+        {
+          "id": 15441,
+          "KodeEmiten": "MTWI",
+          "TanggalPencatatan": "2023-01-12T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 177636523.0,
+          "JumlahSahamSetelahTindakan": 2924486639.0
+        },
+        {
+          "id": 15419,
+          "KodeEmiten": "BBTN",
+          "TanggalPencatatan": "2023-01-11T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 167083375.0,
+          "JumlahSahamSetelahTindakan": 13928544413.0
+        },
+        {
+          "id": 15308,
+          "KodeEmiten": "ASJT",
+          "TanggalPencatatan": "2023-01-04T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 111109304.0,
+          "JumlahSahamSetelahTindakan": 1400000000.0
+        },
+        {
+          "id": 15224,
+          "KodeEmiten": "BBSI",
+          "TanggalPencatatan": "2022-12-28T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 20973918.0,
+          "JumlahSahamSetelahTindakan": 3641650791.0
+        },
+        {
+          "id": 15187,
+          "KodeEmiten": "SMGR",
+          "TanggalPencatatan": "2022-12-28T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 52203740.0,
+          "JumlahSahamSetelahTindakan": 6751540089.0
+        },
+        {
+          "id": 15160,
+          "KodeEmiten": "BGTG",
+          "TanggalPencatatan": "2022-12-27T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 7290759383.0,
+          "JumlahSahamSetelahTindakan": 23803371203.0
+        },
+        {
+          "id": 15009,
+          "KodeEmiten": "BNBA",
+          "TanggalPencatatan": "2022-12-19T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 276556818.0,
+          "JumlahSahamSetelahTindakan": 3360280000.0
+        },
+        {
+          "id": 14998,
+          "KodeEmiten": "VICO",
+          "TanggalPencatatan": "2022-12-15T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 313982.0,
+          "JumlahSahamSetelahTindakan": 15217075658.0
+        },
+        {
+          "id": 14587,
+          "KodeEmiten": "ADHI",
+          "TanggalPencatatan": "2022-11-14T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 37331.0,
+          "JumlahSahamSetelahTindakan": 8407608979.0
+        },
+        {
+          "id": 13970,
+          "KodeEmiten": "WEHA",
+          "TanggalPencatatan": "2022-08-25T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 46800000.0,
+          "JumlahSahamSetelahTindakan": 1460554819.0
+        },
+        {
+          "id": 13971,
+          "KodeEmiten": "AHAP",
+          "TanggalPencatatan": "2022-08-25T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 26108505.0,
+          "JumlahSahamSetelahTindakan": 4900000000.0
+        },
+        {
+          "id": 13194,
+          "KodeEmiten": "MLPL",
+          "TanggalPencatatan": "2022-03-31T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 409931.0,
+          "JumlahSahamSetelahTindakan": 15404243032.0
+        },
+        {
+          "id": 11529,
+          "KodeEmiten": "BJBR",
+          "TanggalPencatatan": "2022-03-22T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 58875061.0,
+          "JumlahSahamSetelahTindakan": 10423055814.0
+        },
+        {
+          "id": 11440,
+          "KodeEmiten": "ABBA",
+          "TanggalPencatatan": "2022-03-10T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 256339721.0,
+          "JumlahSahamSetelahTindakan": 3935892857.0
+        },
+        {
+          "id": 11202,
+          "KodeEmiten": "BRMS",
+          "TanggalPencatatan": "2022-01-11T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 778818460.0,
+          "JumlahSahamSetelahTindakan": 141784040338.0
+        },
+        {
+          "id": 10852,
+          "KodeEmiten": "YELO",
+          "TanggalPencatatan": "2021-11-25T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 301018666.0,
+          "JumlahSahamSetelahTindakan": 1912774405.0
+        },
+        {
+          "id": 10666,
+          "KodeEmiten": "BEKS",
+          "TanggalPencatatan": "2021-10-27T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1923394400.0,
+          "JumlahSahamSetelahTindakan": 51432014826.0
+        },
+        {
+          "id": 10463,
+          "KodeEmiten": "TIFA",
+          "TanggalPencatatan": "2021-09-17T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 186455554.0,
+          "JumlahSahamSetelahTindakan": 3549906716.0
+        },
+        {
+          "id": 10224,
+          "KodeEmiten": "SMCB",
+          "TanggalPencatatan": "2021-07-29T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1000.0,
+          "JumlahSahamSetelahTindakan": 9019381973.0
+        },
+        {
+          "id": 9046,
+          "KodeEmiten": "IMAS",
+          "TanggalPencatatan": "2020-08-18T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 42093633.0,
+          "JumlahSahamSetelahTindakan": 3994291039.0
+        },
+        {
+          "id": 8714,
+          "KodeEmiten": "APLN",
+          "TanggalPencatatan": "2020-03-24T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1153184.0,
+          "JumlahSahamSetelahTindakan": 22699326779.0
+        },
+        {
+          "id": 8617,
+          "KodeEmiten": "CITA",
+          "TanggalPencatatan": "2020-02-19T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 600.0,
+          "JumlahSahamSetelahTindakan": 3960361250.0
+        },
+        {
+          "id": 8064,
+          "KodeEmiten": "GOLD",
+          "TanggalPencatatan": "2019-07-18T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 3023284.0,
+          "JumlahSahamSetelahTindakan": 1277276000.0
+        },
+        {
+          "id": 8057,
+          "KodeEmiten": "LPKR",
+          "TanggalPencatatan": "2019-07-17T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 2152884725.0,
+          "JumlahSahamSetelahTindakan": 70898018369.0
+        },
+        {
+          "id": 7991,
+          "KodeEmiten": "HOME",
+          "TanggalPencatatan": "2019-07-04T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 14096323734.0,
+          "JumlahSahamSetelahTindakan": 22212194782.0
+        },
+        {
+          "id": 7786,
+          "KodeEmiten": "SQMI",
+          "TanggalPencatatan": "2019-02-13T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 15064000000.0,
+          "JumlahSahamSetelahTindakan": 15537591429.0
+        },
+        {
+          "id": 7782,
+          "KodeEmiten": "KMTR",
+          "TanggalPencatatan": "2019-02-12T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 9616264.0,
+          "JumlahSahamSetelahTindakan": 8215366379.0
+        },
+        {
+          "id": 7750,
+          "KodeEmiten": "VRNA",
+          "TanggalPencatatan": "2019-01-25T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 579979914.0,
+          "JumlahSahamSetelahTindakan": 5687353997.0
+        },
+        {
+          "id": 7718,
+          "KodeEmiten": "MYTX",
+          "TanggalPencatatan": "2019-01-15T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 787276926.0,
+          "JumlahSahamSetelahTindakan": 7747281949.0
+        },
+        {
+          "id": 7690,
+          "KodeEmiten": "META",
+          "TanggalPencatatan": "2019-01-02T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 187883525.0,
+          "JumlahSahamSetelahTindakan": 17710708194.0
+        },
+        {
+          "id": 7601,
+          "KodeEmiten": "RBMS",
+          "TanggalPencatatan": "2018-10-25T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 270000000.0,
+          "JumlahSahamSetelahTindakan": 2656212826.0
+        },
+        {
+          "id": 7012,
+          "KodeEmiten": "TMPO",
+          "TanggalPencatatan": "2018-01-29T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 25531271.0,
+          "JumlahSahamSetelahTindakan": 1058333250.0
+        },
+        {
+          "id": 6943,
+          "KodeEmiten": "DAYA",
+          "TanggalPencatatan": "2018-01-09T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 190922660.0,
+          "JumlahSahamSetelahTindakan": 2420547025.0
+        },
+        {
+          "id": 6944,
+          "KodeEmiten": "MABA",
+          "TanggalPencatatan": "2018-01-09T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 34455500.0,
+          "JumlahSahamSetelahTindakan": 15365229912.0
+        },
+        {
+          "id": 6937,
+          "KodeEmiten": "YULE",
+          "TanggalPencatatan": "2018-01-05T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 41194368.0,
+          "JumlahSahamSetelahTindakan": 1785000000.0
+        },
+        {
+          "id": 6866,
+          "KodeEmiten": "SDPC",
+          "TanggalPencatatan": "2017-12-19T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 234834534.0,
+          "JumlahSahamSetelahTindakan": 1274000000.0
+        },
+        {
+          "id": 6830,
+          "KodeEmiten": "MREI",
+          "TanggalPencatatan": "2017-11-29T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 42537383.0,
+          "JumlahSahamSetelahTindakan": 517791681.0
+        },
+        {
+          "id": 6743,
+          "KodeEmiten": "ROTI",
+          "TanggalPencatatan": "2017-10-24T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 253848221.0,
+          "JumlahSahamSetelahTindakan": 6186488888.0
+        },
+        {
+          "id": 3771,
+          "KodeEmiten": "PTPP",
+          "TanggalPencatatan": "2016-12-27T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 19401527.0,
+          "JumlahSahamSetelahTindakan": 6199897354.0
+        },
+        {
+          "id": 3737,
+          "KodeEmiten": "JSMR",
+          "TanggalPencatatan": "2016-12-16T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 7438089.0,
+          "JumlahSahamSetelahTindakan": 7257871200.0
+        },
+        {
+          "id": 3703,
+          "KodeEmiten": "KRAS",
+          "TanggalPencatatan": "2016-12-08T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 27145118.0,
+          "JumlahSahamSetelahTindakan": 19346396900.0
+        },
+        {
+          "id": 3585,
+          "KodeEmiten": "BRNA",
+          "TanggalPencatatan": "2016-10-11T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 5540869.0,
+          "JumlahSahamSetelahTindakan": 979110000.0
+        },
+        {
+          "id": 3389,
+          "KodeEmiten": "AALI",
+          "TanggalPencatatan": "2016-06-24T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1615829.0,
+          "JumlahSahamSetelahTindakan": 1924688333.0
+        },
+        {
+          "id": 12926,
+          "KodeEmiten": "HMSP",
+          "TanggalPencatatan": "2015-10-29T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 100975.0,
+          "JumlahSahamSetelahTindakan": 4647310686.0
+        },
+        {
+          "id": 12923,
+          "KodeEmiten": "ANTM",
+          "TanggalPencatatan": "2015-10-28T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1419898697.0,
+          "JumlahSahamSetelahTindakan": 20729299654.0
+        },
+        {
+          "id": 13057,
+          "KodeEmiten": "HDFA",
+          "TanggalPencatatan": "2015-07-30T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 238839600.0,
+          "JumlahSahamSetelahTindakan": 2329668917.0
+        },
+        {
+          "id": 13058,
+          "KodeEmiten": "BIPP",
+          "TanggalPencatatan": "2015-07-30T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 637830546.0,
+          "JumlahSahamSetelahTindakan": 4669648436.0
+        },
+        {
+          "id": 13046,
+          "KodeEmiten": "INPP",
+          "TanggalPencatatan": "2015-07-23T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1004830174.0,
+          "JumlahSahamSetelahTindakan": 11181971732.0
+        },
+        {
+          "id": 13018,
+          "KodeEmiten": "CENT",
+          "TanggalPencatatan": "2015-07-09T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1479111531.0,
+          "JumlahSahamSetelahTindakan": 10394488300.0
+        },
+        {
+          "id": 13008,
+          "KodeEmiten": "TOTO",
+          "TanggalPencatatan": "2015-07-08T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 258760.0,
+          "JumlahSahamSetelahTindakan": 1032000000.0
+        },
+        {
+          "id": 13152,
+          "KodeEmiten": "RELI",
+          "TanggalPencatatan": "2015-05-21T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 900000000.0,
+          "JumlahSahamSetelahTindakan": 1800000000.0
+        },
+        {
+          "id": 12969,
+          "KodeEmiten": "WOMF",
+          "TanggalPencatatan": "2015-03-10T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 230878211.0,
+          "JumlahSahamSetelahTindakan": 3481481480.0
+        },
+        {
+          "id": 12389,
+          "KodeEmiten": "ARTI",
+          "TanggalPencatatan": "2015-01-16T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 6255836900.0,
+          "JumlahSahamSetelahTindakan": 7840000000.0
+        },
+        {
+          "id": 13137,
+          "KodeEmiten": "SUPR",
+          "TanggalPencatatan": "2015-01-13T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 172552.0,
+          "JumlahSahamSetelahTindakan": 794536033.0
+        },
+        {
+          "id": 13129,
+          "KodeEmiten": "BPFI",
+          "TanggalPencatatan": "2015-01-02T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 100500000.0,
+          "JumlahSahamSetelahTindakan": 1360627100.0
+        },
+        {
+          "id": 13128,
+          "KodeEmiten": "BNII",
+          "TanggalPencatatan": "2014-12-30T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 3959615.0,
+          "JumlahSahamSetelahTindakan": 67068027368.0
+        },
+        {
+          "id": 13125,
+          "KodeEmiten": "BWPT",
+          "TanggalPencatatan": "2014-12-29T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 7649551906.0,
+          "JumlahSahamSetelahTindakan": 27021678000.0
+        },
+        {
+          "id": 12120,
+          "KodeEmiten": "BBRM",
+          "TanggalPencatatan": "2014-12-12T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1600000000.0,
+          "JumlahSahamSetelahTindakan": 5367076248.0
+        },
+        {
+          "id": 12062,
+          "KodeEmiten": "IBST",
+          "TanggalPencatatan": "2014-05-23T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 46771496.0,
+          "JumlahSahamSetelahTindakan": 1350904927.0
+        },
+        {
+          "id": 12522,
+          "KodeEmiten": "MTFN",
+          "TanggalPencatatan": "2014-05-05T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 27833988507.0,
+          "JumlahSahamSetelahTindakan": 31842082852.0
+        },
+        {
+          "id": 12259,
+          "KodeEmiten": "ICON",
+          "TanggalPencatatan": "2014-02-17T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 208911342.0,
+          "JumlahSahamSetelahTindakan": 1089750000.0
+        },
+        {
+          "id": 12232,
+          "KodeEmiten": "BNLI",
+          "TanggalPencatatan": "2014-01-24T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1207706806.0,
+          "JumlahSahamSetelahTindakan": 11764996622.0
+        },
+        {
+          "id": 12500,
+          "KodeEmiten": "NISP",
+          "TanggalPencatatan": "2013-11-29T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 2923730091.0,
+          "JumlahSahamSetelahTindakan": 11357888016.0
+        },
+        {
+          "id": 12423,
+          "KodeEmiten": "INDX",
+          "TanggalPencatatan": "2013-07-29T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 110254739.0,
+          "JumlahSahamSetelahTindakan": 437913588.0
+        },
+        {
+          "id": 12263,
+          "KodeEmiten": "JKON",
+          "TanggalPencatatan": "2013-07-22T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 3148354.0,
+          "JumlahSahamSetelahTindakan": 3261703972.0
+        },
+        {
+          "id": 6627,
+          "KodeEmiten": "DNET",
+          "TanggalPencatatan": "2013-06-26T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 14000000000.0,
+          "JumlahSahamSetelahTindakan": 14184000000.0
+        },
+        {
+          "id": 12191,
+          "KodeEmiten": "AUTO",
+          "TanggalPencatatan": "2013-05-15T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 963946600.0,
+          "JumlahSahamSetelahTindakan": 4819733000.0
+        },
+        {
+          "id": 13546,
+          "KodeEmiten": "EPMT",
+          "TanggalPencatatan": "2011-03-02T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 428640000.0,
+          "JumlahSahamSetelahTindakan": 2708640000.0
+        },
+        {
+          "id": 5468,
+          "KodeEmiten": "MIRA",
+          "TanggalPencatatan": "2008-11-27T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1102690963.0,
+          "JumlahSahamSetelahTindakan": 3968342371.0
+        },
+        {
+          "id": 5421,
+          "KodeEmiten": "RODA",
+          "TanggalPencatatan": "2008-02-01T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 12883800000.0,
+          "JumlahSahamSetelahTindakan": 13474800000.0
+        },
+        {
+          "id": 4923,
+          "KodeEmiten": "FPNI",
+          "TanggalPencatatan": "2008-01-29T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 5156214000.0,
+          "JumlahSahamSetelahTindakan": 5566414000.0
+        },
+        {
+          "id": 5272,
+          "KodeEmiten": "ADES",
+          "TanggalPencatatan": "2007-12-28T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 440176800.0,
+          "JumlahSahamSetelahTindakan": 589896800.0
+        },
+        {
+          "id": 5465,
+          "KodeEmiten": "MIRA",
+          "TanggalPencatatan": "2007-11-30T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1140000000.0,
+          "JumlahSahamSetelahTindakan": 1368000000.0
+        },
+        {
+          "id": 4947,
+          "KodeEmiten": "CPIN",
+          "TanggalPencatatan": "2007-08-01T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 234611529.0,
+          "JumlahSahamSetelahTindakan": 1642280704.0
+        },
+        {
+          "id": 5692,
+          "KodeEmiten": "ASBI",
+          "TanggalPencatatan": "2006-12-27T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 32617574.0,
+          "JumlahSahamSetelahTindakan": 174193236.0
+        },
+        {
+          "id": 4323,
+          "KodeEmiten": "PNBN",
+          "TanggalPencatatan": "2006-09-08T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 3941358393.0,
+          "JumlahSahamSetelahTindakan": 19807260966.0
+        },
+        {
+          "id": 4591,
+          "KodeEmiten": "PNLF",
+          "TanggalPencatatan": "2006-09-07T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 11982506676.0,
+          "JumlahSahamSetelahTindakan": 23964219688.0
+        },
+        {
+          "id": 5756,
+          "KodeEmiten": "PNIN",
+          "TanggalPencatatan": "2006-09-07T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1694402849.0,
+          "JumlahSahamSetelahTindakan": 4831868671.0
+        },
+        {
+          "id": 5759,
+          "KodeEmiten": "ARTA",
+          "TanggalPencatatan": "2005-07-27T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 145000000.0,
+          "JumlahSahamSetelahTindakan": 435000000.0
+        },
+        {
+          "id": 6051,
+          "KodeEmiten": "PLAS",
+          "TanggalPencatatan": "2005-04-25T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 409200000.0,
+          "JumlahSahamSetelahTindakan": 1184200000.0
+        },
+        {
+          "id": 5650,
+          "KodeEmiten": "KREN",
+          "TanggalPencatatan": "2005-02-05T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 219000.0,
+          "JumlahSahamSetelahTindakan": 365219000.0
+        },
+        {
+          "id": 5685,
+          "KodeEmiten": "ABDA",
+          "TanggalPencatatan": "2004-12-21T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 137957040.0,
+          "JumlahSahamSetelahTindakan": 275614080.0
+        },
+        {
+          "id": 4713,
+          "KodeEmiten": "CNKO",
+          "TanggalPencatatan": "2004-12-19T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 3220000000.0,
+          "JumlahSahamSetelahTindakan": 3335000000.0
+        },
+        {
+          "id": 5942,
+          "KodeEmiten": "PGLI",
+          "TanggalPencatatan": "2004-12-03T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 122000000.0,
+          "JumlahSahamSetelahTindakan": 488000000.0
+        },
+        {
+          "id": 5124,
+          "KodeEmiten": "RICY",
+          "TanggalPencatatan": "2004-07-28T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 353717510.0,
+          "JumlahSahamSetelahTindakan": 641717510.0
+        },
+        {
+          "id": 6050,
+          "KodeEmiten": "PLAS",
+          "TanggalPencatatan": "2004-07-07T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 750000000.0,
+          "JumlahSahamSetelahTindakan": 775000000.0
+        },
+        {
+          "id": 4421,
+          "KodeEmiten": "UNTR",
+          "TanggalPencatatan": "2004-06-30T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1261553600.0,
+          "JumlahSahamSetelahTindakan": 2807153600.0
+        },
+        {
+          "id": 5941,
+          "KodeEmiten": "PGLI",
+          "TanggalPencatatan": "2004-06-30T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 61000000.0,
+          "JumlahSahamSetelahTindakan": 366000000.0
+        },
+        {
+          "id": 4938,
+          "KodeEmiten": "TRST",
+          "TanggalPencatatan": "2003-12-03T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 648000.0,
+          "JumlahSahamSetelahTindakan": 2160648000.0
+        },
+        {
+          "id": 6119,
+          "KodeEmiten": "TIRT",
+          "TanggalPencatatan": "2003-03-14T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 156000000.0,
+          "JumlahSahamSetelahTindakan": 780000000.0
+        },
+        {
+          "id": 5926,
+          "KodeEmiten": "JSPT",
+          "TanggalPencatatan": "2002-12-11T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1782736000.0,
+          "JumlahSahamSetelahTindakan": 2318736000.0
+        },
+        {
+          "id": 4749,
+          "KodeEmiten": "ARNA",
+          "TanggalPencatatan": "2002-11-22T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 356753150.0,
+          "JumlahSahamSetelahTindakan": 905604150.0
+        },
+        {
+          "id": 4960,
+          "KodeEmiten": "DSFI",
+          "TanggalPencatatan": "2002-07-24T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 928567750.0,
+          "JumlahSahamSetelahTindakan": 1819147750.0
+        },
+        {
+          "id": 5683,
+          "KodeEmiten": "ABDA",
+          "TanggalPencatatan": "2002-01-15T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 70747200.0,
+          "JumlahSahamSetelahTindakan": 105820800.0
+        },
+        {
+          "id": 5884,
+          "KodeEmiten": "HERO",
+          "TanggalPencatatan": "2001-09-05T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 94120000.0,
+          "JumlahSahamSetelahTindakan": 329420000.0
+        },
+        {
+          "id": 5939,
+          "KodeEmiten": "PGLI",
+          "TanggalPencatatan": "2001-06-29T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 40000000.0,
+          "JumlahSahamSetelahTindakan": 610000000.0
+        },
+        {
+          "id": 6210,
+          "KodeEmiten": "PTSP",
+          "TanggalPencatatan": "2001-02-05T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 96808000.0,
+          "JumlahSahamSetelahTindakan": 220808000.0
+        },
+        {
+          "id": 4851,
+          "KodeEmiten": "SRSN",
+          "TanggalPencatatan": "2000-10-11T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 81100000.0,
+          "JumlahSahamSetelahTindakan": 110000000.0
+        },
+        {
+          "id": 5202,
+          "KodeEmiten": "TFCO",
+          "TanggalPencatatan": "2000-09-27T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 180320000.0,
+          "JumlahSahamSetelahTindakan": 193200000.0
+        },
+        {
+          "id": 5073,
+          "KodeEmiten": "ESTI",
+          "TanggalPencatatan": "2000-07-12T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 127467840.0,
+          "JumlahSahamSetelahTindakan": 253695280.0
+        },
+        {
+          "id": 4153,
+          "KodeEmiten": "CFIN",
+          "TanggalPencatatan": "2000-07-11T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 171088532.0,
+          "JumlahSahamSetelahTindakan": 463606040.0
+        },
+        {
+          "id": 5336,
+          "KodeEmiten": "BATI",
+          "TanggalPencatatan": "2000-06-15T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 44000000.0,
+          "JumlahSahamSetelahTindakan": 66000000.0
+        },
+        {
+          "id": 5221,
+          "KodeEmiten": "DLTA",
+          "TanggalPencatatan": "2000-01-04T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 420347.0,
+          "JumlahSahamSetelahTindakan": 3361166.0
+        },
+        {
+          "id": 4588,
+          "KodeEmiten": "PNLF",
+          "TanggalPencatatan": "1999-12-20T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1545370857.0,
+          "JumlahSahamSetelahTindakan": 2993362371.0
+        },
+        {
+          "id": 6068,
+          "KodeEmiten": "LPLI",
+          "TanggalPencatatan": "1999-11-26T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 3846840606.0,
+          "JumlahSahamSetelahTindakan": 12120345846.0
+        },
+        {
+          "id": 4152,
+          "KodeEmiten": "CFIN",
+          "TanggalPencatatan": "1999-10-27T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 195011672.0,
+          "JumlahSahamSetelahTindakan": 292517508.0
+        },
+        {
+          "id": 5752,
+          "KodeEmiten": "PNIN",
+          "TanggalPencatatan": "1999-07-05T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 500095905.0,
+          "JumlahSahamSetelahTindakan": 1950704538.0
+        },
+        {
+          "id": 5625,
+          "KodeEmiten": "LPBN",
+          "TanggalPencatatan": "1999-07-05T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 16277500296.0,
+          "JumlahSahamSetelahTindakan": 25637062965.0
+        },
+        {
+          "id": 4319,
+          "KodeEmiten": "PNBN",
+          "TanggalPencatatan": "1999-07-05T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1210406221.0,
+          "JumlahSahamSetelahTindakan": 2918451938.0
+        },
+        {
+          "id": 5123,
+          "KodeEmiten": "RICY",
+          "TanggalPencatatan": "1999-06-24T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 128000000.0,
+          "JumlahSahamSetelahTindakan": 288000000.0
+        },
+        {
+          "id": 4601,
+          "KodeEmiten": "ASII",
+          "TanggalPencatatan": "1999-06-01T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 218054182.0,
+          "JumlahSahamSetelahTindakan": 2541216656.0
+        },
+        {
+          "id": 5377,
+          "KodeEmiten": "MERK",
+          "TanggalPencatatan": "1999-05-19T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 16800000.0,
+          "JumlahSahamSetelahTindakan": 18480000.0
+        },
+        {
+          "id": 4781,
+          "KodeEmiten": "CTBN",
+          "TanggalPencatatan": "1999-01-04T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 5000000.0,
+          "JumlahSahamSetelahTindakan": 50000000.0
+        },
+        {
+          "id": 5622,
+          "KodeEmiten": "LPBN",
+          "TanggalPencatatan": "1998-12-24T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 3664547860.0,
+          "JumlahSahamSetelahTindakan": 4521527860.0
+        },
+        {
+          "id": 4315,
+          "KodeEmiten": "PNBN",
+          "TanggalPencatatan": "1998-07-13T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 702105395.0,
+          "JumlahSahamSetelahTindakan": 1580281331.0
+        },
+        {
+          "id": 4586,
+          "KodeEmiten": "PNLF",
+          "TanggalPencatatan": "1998-07-13T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1272786722.0,
+          "JumlahSahamSetelahTindakan": 1419991514.0
+        },
+        {
+          "id": 5750,
+          "KodeEmiten": "PNIN",
+          "TanggalPencatatan": "1998-07-13T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 205996290.0,
+          "JumlahSahamSetelahTindakan": 1450605299.0
+        },
+        {
+          "id": 5803,
+          "KodeEmiten": "HEXA",
+          "TanggalPencatatan": "1998-07-10T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 42000000.0,
+          "JumlahSahamSetelahTindakan": 84000000.0
+        },
+        {
+          "id": 5371,
+          "KodeEmiten": "DVLA",
+          "TanggalPencatatan": "1998-07-03T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 420000000.0,
+          "JumlahSahamSetelahTindakan": 560000000.0
+        },
+        {
+          "id": 5372,
+          "KodeEmiten": "DVLA",
+          "TanggalPencatatan": "1998-07-03T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 435000000.0,
+          "JumlahSahamSetelahTindakan": 995000000.0
+        },
+        {
+          "id": 5120,
+          "KodeEmiten": "POLY",
+          "TanggalPencatatan": "1998-01-05T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 3473920000.0,
+          "JumlahSahamSetelahTindakan": 47538158750.0
+        },
+        {
+          "id": 4148,
+          "KodeEmiten": "CFIN",
+          "TanggalPencatatan": "1997-11-07T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 29600034.0,
+          "JumlahSahamSetelahTindakan": 35550063.0
+        },
+        {
+          "id": 5919,
+          "KodeEmiten": "SHID",
+          "TanggalPencatatan": "1997-10-17T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 217600000.0,
+          "JumlahSahamSetelahTindakan": 242512000.0
+        },
+        {
+          "id": 5105,
+          "KodeEmiten": "UNTX",
+          "TanggalPencatatan": "1997-10-09T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 5985360.0,
+          "JumlahSahamSetelahTindakan": 10683640.0
+        },
+        {
+          "id": 4914,
+          "KodeEmiten": "DYNA",
+          "TanggalPencatatan": "1997-08-11T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 65156400.0,
+          "JumlahSahamSetelahTindakan": 130312800.0
+        },
+        {
+          "id": 5768,
+          "KodeEmiten": "LPPS",
+          "TanggalPencatatan": "1997-07-31T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1566000000.0,
+          "JumlahSahamSetelahTindakan": 1594000000.0
+        },
+        {
+          "id": 4509,
+          "KodeEmiten": "INKP",
+          "TanggalPencatatan": "1997-07-11T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1275226380.0,
+          "JumlahSahamSetelahTindakan": 2553532529.0
+        },
+        {
+          "id": 4965,
+          "KodeEmiten": "KIAS",
+          "TanggalPencatatan": "1997-07-09T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 255000000.0,
+          "JumlahSahamSetelahTindakan": 425000000.0
+        },
+        {
+          "id": 4314,
+          "KodeEmiten": "PNBN",
+          "TanggalPencatatan": "1997-06-27T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 300902312.0,
+          "JumlahSahamSetelahTindakan": 878175936.0
+        },
+        {
+          "id": 5235,
+          "KodeEmiten": "KBLI",
+          "TanggalPencatatan": "1997-06-07T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 140000000.0,
+          "JumlahSahamSetelahTindakan": 280000000.0
+        },
+        {
+          "id": 5094,
+          "KodeEmiten": "KARW",
+          "TanggalPencatatan": "1997-06-05T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 390000000.0,
+          "JumlahSahamSetelahTindakan": 585000000.0
+        },
+        {
+          "id": 4168,
+          "KodeEmiten": "INDF",
+          "TanggalPencatatan": "1997-04-24T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 305200000.0,
+          "JumlahSahamSetelahTindakan": 1831200000.0
+        },
+        {
+          "id": 5456,
+          "KodeEmiten": "DUTI",
+          "TanggalPencatatan": "1997-04-15T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 693750000.0,
+          "JumlahSahamSetelahTindakan": 1387500000.0
+        },
+        {
+          "id": 5746,
+          "KodeEmiten": "PNIN",
+          "TanggalPencatatan": "1997-01-09T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 300357900.0,
+          "JumlahSahamSetelahTindakan": 1244523640.0
+        },
+        {
+          "id": 6066,
+          "KodeEmiten": "LPLI",
+          "TanggalPencatatan": "1996-11-26T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 6769231560.0,
+          "JumlahSahamSetelahTindakan": 8273505240.0
+        },
+        {
+          "id": 5112,
+          "KodeEmiten": "ADMG",
+          "TanggalPencatatan": "1996-10-21T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 800000000.0,
+          "JumlahSahamSetelahTindakan": 1120000000.0
+        },
+        {
+          "id": 4996,
+          "KodeEmiten": "GJTL",
+          "TanggalPencatatan": "1996-10-14T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 792000000.0,
+          "JumlahSahamSetelahTindakan": 1584000000.0
+        },
+        {
+          "id": 4508,
+          "KodeEmiten": "INKP",
+          "TanggalPencatatan": "1996-10-03T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 94525652.0,
+          "JumlahSahamSetelahTindakan": 1278306149.0
+        },
+        {
+          "id": 5985,
+          "KodeEmiten": "ASGR",
+          "TanggalPencatatan": "1996-07-30T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 26906250.0,
+          "JumlahSahamSetelahTindakan": 42281250.0
+        },
+        {
+          "id": 6065,
+          "KodeEmiten": "LPLI",
+          "TanggalPencatatan": "1996-07-18T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1118562480.0,
+          "JumlahSahamSetelahTindakan": 1504273680.0
+        },
+        {
+          "id": 6064,
+          "KodeEmiten": "LPLI",
+          "TanggalPencatatan": "1996-07-15T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 192855600.0,
+          "JumlahSahamSetelahTindakan": 385711200.0
+        },
+        {
+          "id": 5620,
+          "KodeEmiten": "LPBN",
+          "TanggalPencatatan": "1996-06-19T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 142830000.0,
+          "JumlahSahamSetelahTindakan": 428490000.0
+        },
+        {
+          "id": 5370,
+          "KodeEmiten": "DVLA",
+          "TanggalPencatatan": "1996-05-03T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 15000000.0,
+          "JumlahSahamSetelahTindakan": 140000000.0
+        },
+        {
+          "id": 4505,
+          "KodeEmiten": "INKP",
+          "TanggalPencatatan": "1996-04-15T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 191294708.0,
+          "JumlahSahamSetelahTindakan": 952140384.0
+        },
+        {
+          "id": 5501,
+          "KodeEmiten": "PTRA",
+          "TanggalPencatatan": "1996-02-27T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 472500000.0,
+          "JumlahSahamSetelahTindakan": 997500000.0
+        },
+        {
+          "id": 6201,
+          "KodeEmiten": "BAYU",
+          "TanggalPencatatan": "1995-07-18T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 96000000.0,
+          "JumlahSahamSetelahTindakan": 120000000.0
+        },
+        {
+          "id": 5246,
+          "KodeEmiten": "KBLM",
+          "TanggalPencatatan": "1995-07-07T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 28000000.0,
+          "JumlahSahamSetelahTindakan": 56000000.0
+        },
+        {
+          "id": 4312,
+          "KodeEmiten": "PNBN",
+          "TanggalPencatatan": "1995-06-29T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 60180462.0,
+          "JumlahSahamSetelahTindakan": 276371312.0
+        },
+        {
+          "id": 5087,
+          "KodeEmiten": "INDR",
+          "TanggalPencatatan": "1995-06-08T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 24911513.0,
+          "JumlahSahamSetelahTindakan": 353714702.0
+        },
+        {
+          "id": 4943,
+          "KodeEmiten": "CPIN",
+          "TanggalPencatatan": "1995-02-07T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 56306767.0,
+          "JumlahSahamSetelahTindakan": 112613534.0
+        },
+        {
+          "id": 5509,
+          "KodeEmiten": "PWON",
+          "TanggalPencatatan": "1994-12-18T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 105000000.0,
+          "JumlahSahamSetelahTindakan": 210000000.0
+        },
+        {
+          "id": 5110,
+          "KodeEmiten": "ADMG",
+          "TanggalPencatatan": "1994-11-25T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 80000000.0,
+          "JumlahSahamSetelahTindakan": 160000000.0
+        },
+        {
+          "id": 5864,
+          "KodeEmiten": "TIRA",
+          "TanggalPencatatan": "1994-08-25T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 42000000.0,
+          "JumlahSahamSetelahTindakan": 56000000.0
+        },
+        {
+          "id": 5438,
+          "KodeEmiten": "DILD",
+          "TanggalPencatatan": "1994-06-24T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 81209000.0,
+          "JumlahSahamSetelahTindakan": 243627000.0
+        },
+        {
+          "id": 6060,
+          "KodeEmiten": "LPLI",
+          "TanggalPencatatan": "1994-06-17T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 36160425.0,
+          "JumlahSahamSetelahTindakan": 45610291.0
+        },
+        {
+          "id": 4780,
+          "KodeEmiten": "CTBN",
+          "TanggalPencatatan": "1994-06-13T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 15000000.0,
+          "JumlahSahamSetelahTindakan": 45000000.0
+        },
+        {
+          "id": 5268,
+          "KodeEmiten": "ADES",
+          "TanggalPencatatan": "1994-06-11T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 73720000.0,
+          "JumlahSahamSetelahTindakan": 73720000.0
+        },
+        {
+          "id": 5633,
+          "KodeEmiten": "BBLD",
+          "TanggalPencatatan": "1994-05-31T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 10200.0,
+          "JumlahSahamSetelahTindakan": 27010200.0
+        },
+        {
+          "id": 5634,
+          "KodeEmiten": "BBLD",
+          "TanggalPencatatan": "1994-05-31T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 1300.0,
+          "JumlahSahamSetelahTindakan": 27011500.0
+        },
+        {
+          "id": 5635,
+          "KodeEmiten": "BBLD",
+          "TanggalPencatatan": "1994-05-31T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 17976140.0,
+          "JumlahSahamSetelahTindakan": 44987640.0
+        },
+        {
+          "id": 5636,
+          "KodeEmiten": "BBLD",
+          "TanggalPencatatan": "1994-05-31T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 12360.0,
+          "JumlahSahamSetelahTindakan": 45000000.0
+        },
+        {
+          "id": 5947,
+          "KodeEmiten": "PLIN",
+          "TanggalPencatatan": "1994-05-26T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 40500.0,
+          "JumlahSahamSetelahTindakan": 230040500.0
+        },
+        {
+          "id": 5948,
+          "KodeEmiten": "PLIN",
+          "TanggalPencatatan": "1994-05-26T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 5000.0,
+          "JumlahSahamSetelahTindakan": 230045500.0
+        },
+        {
+          "id": 5949,
+          "KodeEmiten": "PLIN",
+          "TanggalPencatatan": "1994-05-26T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 506100.0,
+          "JumlahSahamSetelahTindakan": 230551600.0
+        },
+        {
+          "id": 5950,
+          "KodeEmiten": "PLIN",
+          "TanggalPencatatan": "1994-05-26T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 200.0,
+          "JumlahSahamSetelahTindakan": 230551800.0
+        },
+        {
+          "id": 5951,
+          "KodeEmiten": "PLIN",
+          "TanggalPencatatan": "1994-05-26T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 110732900.0,
+          "JumlahSahamSetelahTindakan": 341284700.0
+        },
+        {
+          "id": 5952,
+          "KodeEmiten": "PLIN",
+          "TanggalPencatatan": "1994-05-26T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 3715300.0,
+          "JumlahSahamSetelahTindakan": 345000000.0
+        },
+        {
+          "id": 4273,
+          "KodeEmiten": "MYOR",
+          "TanggalPencatatan": "1994-03-01T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 24570000.0,
+          "JumlahSahamSetelahTindakan": 122850000.0
+        },
+        {
+          "id": 4912,
+          "KodeEmiten": "DYNA",
+          "TanggalPencatatan": "1994-02-21T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 10859400.0,
+          "JumlahSahamSetelahTindakan": 32578200.0
+        },
+        {
+          "id": 4994,
+          "KodeEmiten": "GJTL",
+          "TanggalPencatatan": "1994-02-11T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 198000000.0,
+          "JumlahSahamSetelahTindakan": 396000000.0
+        },
+        {
+          "id": 4933,
+          "KodeEmiten": "TRST",
+          "TanggalPencatatan": "1994-01-17T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 48000000.0,
+          "JumlahSahamSetelahTindakan": 96000000.0
+        },
+        {
+          "id": 5128,
+          "KodeEmiten": "RDTX",
+          "TanggalPencatatan": "1994-01-04T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 42000000.0,
+          "JumlahSahamSetelahTindakan": 136000000.0
+        },
+        {
+          "id": 4597,
+          "KodeEmiten": "ASII",
+          "TanggalPencatatan": "1994-01-03T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 48439600.0,
+          "JumlahSahamSetelahTindakan": 288137600.0
+        },
+        {
+          "id": 5889,
+          "KodeEmiten": "MTSM",
+          "TanggalPencatatan": "1993-12-27T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 7560000.0,
+          "JumlahSahamSetelahTindakan": 26460000.0
+        },
+        {
+          "id": 5618,
+          "KodeEmiten": "LPBN",
+          "TanggalPencatatan": "1993-12-20T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 47610000.0,
+          "JumlahSahamSetelahTindakan": 190440000.0
+        },
+        {
+          "id": 5741,
+          "KodeEmiten": "PNIN",
+          "TanggalPencatatan": "1993-12-16T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 40000.0,
+          "JumlahSahamSetelahTindakan": 781273574.0
+        },
+        {
+          "id": 5446,
+          "KodeEmiten": "DART",
+          "TanggalPencatatan": "1993-11-17T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 33000000.0,
+          "JumlahSahamSetelahTindakan": 165000000.0
+        },
+        {
+          "id": 5233,
+          "KodeEmiten": "KBLI",
+          "TanggalPencatatan": "1993-09-27T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 20000000.0,
+          "JumlahSahamSetelahTindakan": 70000000.0
+        },
+        {
+          "id": 6200,
+          "KodeEmiten": "BAYU",
+          "TanggalPencatatan": "1993-09-20T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 18000000.0,
+          "JumlahSahamSetelahTindakan": 24000000.0
+        },
+        {
+          "id": 4904,
+          "KodeEmiten": "BRNA",
+          "TanggalPencatatan": "1993-09-08T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 17250000.0,
+          "JumlahSahamSetelahTindakan": 23000000.0
+        },
+        {
+          "id": 4308,
+          "KodeEmiten": "PNBN",
+          "TanggalPencatatan": "1993-05-28T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 2256000.0,
+          "JumlahSahamSetelahTindakan": 67678850.0
+        },
+        {
+          "id": 4304,
+          "KodeEmiten": "PNBN",
+          "TanggalPencatatan": "1992-12-24T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 320000.0,
+          "JumlahSahamSetelahTindakan": 55323650.0
+        },
+        {
+          "id": 4305,
+          "KodeEmiten": "PNBN",
+          "TanggalPencatatan": "1992-12-24T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 384000.0,
+          "JumlahSahamSetelahTindakan": 55707650.0
+        },
+        {
+          "id": 5736,
+          "KodeEmiten": "PNIN",
+          "TanggalPencatatan": "1992-12-23T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 254000.0,
+          "JumlahSahamSetelahTindakan": 765485476.0
+        },
+        {
+          "id": 5564,
+          "KodeEmiten": "RIGS",
+          "TanggalPencatatan": "1992-11-29T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 30456500.0,
+          "JumlahSahamSetelahTindakan": 60913000.0
+        },
+        {
+          "id": 4270,
+          "KodeEmiten": "MYOR",
+          "TanggalPencatatan": "1992-10-15T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 63000000.0,
+          "JumlahSahamSetelahTindakan": 80010000.0
+        },
+        {
+          "id": 5880,
+          "KodeEmiten": "HERO",
+          "TanggalPencatatan": "1992-09-10T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 29412500.0,
+          "JumlahSahamSetelahTindakan": 51825000.0
+        },
+        {
+          "id": 5437,
+          "KodeEmiten": "DILD",
+          "TanggalPencatatan": "1992-09-10T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 121418000.0,
+          "JumlahSahamSetelahTindakan": 162418000.0
+        },
+        {
+          "id": 5507,
+          "KodeEmiten": "PWON",
+          "TanggalPencatatan": "1991-10-01T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 50000000.0,
+          "JumlahSahamSetelahTindakan": 70000000.0
+        },
+        {
+          "id": 5856,
+          "KodeEmiten": "TGKA",
+          "TanggalPencatatan": "1991-08-14T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 27000000.0,
+          "JumlahSahamSetelahTindakan": 40500000.0
+        },
+        {
+          "id": 4415,
+          "KodeEmiten": "UNTR",
+          "TanggalPencatatan": "1991-05-27T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 11500000.0,
+          "JumlahSahamSetelahTindakan": 22636000.0
+        },
+        {
+          "id": 5678,
+          "KodeEmiten": "ABDA",
+          "TanggalPencatatan": "1990-08-07T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 3240000.0,
+          "JumlahSahamSetelahTindakan": 8640000.0
+        },
+        {
+          "id": 5879,
+          "KodeEmiten": "HERO",
+          "TanggalPencatatan": "1990-07-18T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 17647500.0,
+          "JumlahSahamSetelahTindakan": 22412500.0
+        },
+        {
+          "id": 4299,
+          "KodeEmiten": "PNBN",
+          "TanggalPencatatan": "1990-06-25T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 2614410.0,
+          "JumlahSahamSetelahTindakan": 8329065.0
+        },
+        {
+          "id": 4298,
+          "KodeEmiten": "PNBN",
+          "TanggalPencatatan": "1989-11-02T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 914655.0,
+          "JumlahSahamSetelahTindakan": 5714655.0
+        }
+      ]
     },
     "stockSplit": {
       "count": 199,
@@ -2224,49 +4145,8 @@
       ]
     },
     "reverseStock": {
-      "count": 5,
-      "data": [
-        {
-          "id": 6069,
-          "KodeEmiten": "LPLI",
-          "TanggalPencatatan": "2005-03-28T00:00:00",
-          "JenisTindakan": "Reverse Stock",
-          "JumlahSaham": 4051498171.0,
-          "JumlahSahamSetelahTindakan": 8068847675.0
-        },
-        {
-          "id": 6049,
-          "KodeEmiten": "PLAS",
-          "TanggalPencatatan": "2004-03-18T00:00:00",
-          "JenisTindakan": "Reverse Stock",
-          "JumlahSaham": 225000000.0,
-          "JumlahSahamSetelahTindakan": 25000000.0
-        },
-        {
-          "id": 4712,
-          "KodeEmiten": "CNKO",
-          "TanggalPencatatan": "2003-11-19T00:00:00",
-          "JenisTindakan": "Reverse Stock",
-          "JumlahSaham": 2185000000.0,
-          "JumlahSahamSetelahTindakan": 115000000.0
-        },
-        {
-          "id": 5628,
-          "KodeEmiten": "LPBN",
-          "TanggalPencatatan": "2002-12-11T00:00:00",
-          "JenisTindakan": "Reverse Stock",
-          "JumlahSaham": 34889181372.0,
-          "JumlahSahamSetelahTindakan": 3876575709.0
-        },
-        {
-          "id": 5940,
-          "KodeEmiten": "PGLI",
-          "TanggalPencatatan": "2002-05-29T00:00:00",
-          "JenisTindakan": "Reverse Stock",
-          "JumlahSaham": 305000000.0,
-          "JumlahSahamSetelahTindakan": 305000000.0
-        }
-      ]
+      "count": 0,
+      "data": []
     },
     "sahamBonus": {
       "count": 141,
@@ -7000,36 +8880,60 @@
       "count": 234,
       "data": [
         {
-          "id": 83078,
+          "id": 83086,
           "KodeEmiten": "KOCI",
-          "TanggalPencatatan": "2026-09-15T00:00:00",
+          "TanggalPencatatan": "2026-09-16T00:00:00",
           "JenisTindakan": "Waran",
-          "JumlahSaham": 24000.0,
-          "JumlahSahamSetelahTindakan": 4467579405.0
+          "JumlahSaham": 48209.0,
+          "JumlahSahamSetelahTindakan": 4467627614.0
         },
         {
-          "id": 83079,
+          "id": 83087,
           "KodeEmiten": "PJHB",
-          "TanggalPencatatan": "2026-09-15T00:00:00",
+          "TanggalPencatatan": "2026-09-16T00:00:00",
           "JenisTindakan": "Waran",
-          "JumlahSaham": 9189.0,
-          "JumlahSahamSetelahTindakan": 1921027794.0
+          "JumlahSaham": 2209.0,
+          "JumlahSahamSetelahTindakan": 1921030003.0
         },
         {
-          "id": 83080,
+          "id": 83088,
           "KodeEmiten": "MANG",
-          "TanggalPencatatan": "2026-09-15T00:00:00",
+          "TanggalPencatatan": "2026-09-16T00:00:00",
           "JenisTindakan": "Waran",
           "JumlahSaham": 100.0,
-          "JumlahSahamSetelahTindakan": 3812605929.0
+          "JumlahSahamSetelahTindakan": 3812606029.0
         },
         {
-          "id": 83081,
+          "id": 83089,
           "KodeEmiten": "CYBR",
-          "TanggalPencatatan": "2026-09-15T00:00:00",
+          "TanggalPencatatan": "2026-09-16T00:00:00",
           "JenisTindakan": "Waran",
-          "JumlahSaham": 500.0,
-          "JumlahSahamSetelahTindakan": 13486059405.0
+          "JumlahSaham": 210600.0,
+          "JumlahSahamSetelahTindakan": 13486270005.0
+        },
+        {
+          "id": 83090,
+          "KodeEmiten": "PYFA",
+          "TanggalPencatatan": "2026-09-16T00:00:00",
+          "JenisTindakan": "Waran",
+          "JumlahSaham": 14.0,
+          "JumlahSahamSetelahTindakan": 11236750967.0
+        },
+        {
+          "id": 83091,
+          "KodeEmiten": "CSIS",
+          "TanggalPencatatan": "2026-09-16T00:00:00",
+          "JenisTindakan": "Waran",
+          "JumlahSaham": 8.0,
+          "JumlahSahamSetelahTindakan": 1829803825.0
+        },
+        {
+          "id": 83092,
+          "KodeEmiten": "MGNA",
+          "TanggalPencatatan": "2026-09-16T00:00:00",
+          "JenisTindakan": "Waran",
+          "JumlahSaham": 50.0,
+          "JumlahSahamSetelahTindakan": 3411124835.0
         },
         {
           "id": 83082,
@@ -7046,30 +8950,6 @@
           "JenisTindakan": "Waran",
           "JumlahSaham": 74232.0,
           "JumlahSahamSetelahTindakan": 22377753318.0
-        },
-        {
-          "id": 83084,
-          "KodeEmiten": "PYFA",
-          "TanggalPencatatan": "2026-09-15T00:00:00",
-          "JenisTindakan": "Waran",
-          "JumlahSaham": 5.0,
-          "JumlahSahamSetelahTindakan": 11236750953.0
-        },
-        {
-          "id": 83075,
-          "KodeEmiten": "CSIS",
-          "TanggalPencatatan": "2026-09-14T00:00:00",
-          "JenisTindakan": "Waran",
-          "JumlahSaham": 106.0,
-          "JumlahSahamSetelahTindakan": 1829803817.0
-        },
-        {
-          "id": 83077,
-          "KodeEmiten": "MGNA",
-          "TanggalPencatatan": "2026-09-14T00:00:00",
-          "JenisTindakan": "Waran",
-          "JumlahSaham": 200.0,
-          "JumlahSahamSetelahTindakan": 3411124785.0
         },
         {
           "id": 82854,
@@ -8874,270 +10754,12 @@
       ]
     },
     "gabungUsaha": {
-      "count": 10,
-      "data": [
-        {
-          "id": 82062,
-          "KodeEmiten": "MORA",
-          "TanggalPencatatan": "2026-04-23T00:00:00",
-          "JenisTindakan": "Penggabungan Usaha",
-          "JumlahSaham": 24127524045.0,
-          "JumlahSahamSetelahTindakan": 47774192736.0
-        },
-        {
-          "id": 81846,
-          "KodeEmiten": "SOSS",
-          "TanggalPencatatan": "2026-04-02T00:00:00",
-          "JenisTindakan": "Penggabungan Usaha",
-          "JumlahSaham": 175111512.0,
-          "JumlahSahamSetelahTindakan": 974525743.0
-        },
-        {
-          "id": 49343,
-          "KodeEmiten": "ADMF",
-          "TanggalPencatatan": "2025-10-02T00:00:00",
-          "JenisTindakan": "Penggabungan Usaha",
-          "JumlahSaham": 235803109.0,
-          "JumlahSahamSetelahTindakan": 1235803109.0
-        },
-        {
-          "id": 47253,
-          "KodeEmiten": "EXCL",
-          "TanggalPencatatan": "2025-04-17T00:00:00",
-          "JenisTindakan": "Penggabungan Usaha",
-          "JumlahSaham": 5071431786.0,
-          "JumlahSahamSetelahTindakan": 18199862451.0
-        },
-        {
-          "id": 19513,
-          "KodeEmiten": "JARR",
-          "TanggalPencatatan": "2023-12-06T00:00:00",
-          "JenisTindakan": "Penggabungan Usaha",
-          "JumlahSaham": 0.0,
-          "JumlahSahamSetelahTindakan": 0.0
-        },
-        {
-          "id": 15276,
-          "KodeEmiten": "BRAM",
-          "TanggalPencatatan": "2023-01-02T00:00:00",
-          "JenisTindakan": "Penggabungan Usaha",
-          "JumlahSaham": 56980.0,
-          "JumlahSahamSetelahTindakan": 450056980.0
-        },
-        {
-          "id": 15210,
-          "KodeEmiten": "PGUN",
-          "TanggalPencatatan": "2022-12-29T00:00:00",
-          "JenisTindakan": "Penggabungan Usaha",
-          "JumlahSaham": 739488882.0,
-          "JumlahSahamSetelahTindakan": 5737848882.0
-        },
-        {
-          "id": 7875,
-          "KodeEmiten": "BDMN",
-          "TanggalPencatatan": "2019-05-02T00:00:00",
-          "JenisTindakan": "Penggabungan Usaha",
-          "JumlahSaham": 187020410.0,
-          "JumlahSahamSetelahTindakan": 9675817341.0
-        },
-        {
-          "id": 7568,
-          "KodeEmiten": "GDST",
-          "TanggalPencatatan": "2018-10-08T00:00:00",
-          "JenisTindakan": "Penggabungan Usaha",
-          "JumlahSaham": 1042500000.0,
-          "JumlahSahamSetelahTindakan": 9242500000.0
-        },
-        {
-          "id": 5317,
-          "KodeEmiten": "STTP",
-          "TanggalPencatatan": "2001-07-19T00:00:00",
-          "JenisTindakan": "Penggabungan Usaha",
-          "JumlahSaham": 15000000.0,
-          "JumlahSahamSetelahTindakan": 262000000.0
-        }
-      ]
+      "count": 0,
+      "data": []
     },
     "kurangModal": {
-      "count": 22,
-      "data": [
-        {
-          "id": 82840,
-          "KodeEmiten": "SCMA",
-          "TanggalPencatatan": "2026-08-10T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 10405866225.0,
-          "JumlahSahamSetelahTindakan": 63564703280.0
-        },
-        {
-          "id": 82770,
-          "KodeEmiten": "INTP",
-          "TanggalPencatatan": "2026-07-29T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 84529400.0,
-          "JumlahSahamSetelahTindakan": 3431073399.0
-        },
-        {
-          "id": 82540,
-          "KodeEmiten": "ADRO",
-          "TanggalPencatatan": "2026-07-13T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 589195200.0,
-          "JumlahSahamSetelahTindakan": 28800494200.0
-        },
-        {
-          "id": 82438,
-          "KodeEmiten": "LPPF",
-          "TanggalPencatatan": "2026-06-30T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 31000000.0,
-          "JumlahSahamSetelahTindakan": 2227279280.0
-        },
-        {
-          "id": 81547,
-          "KodeEmiten": "EMAS",
-          "TanggalPencatatan": "2026-02-24T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 1448866615.0,
-          "JumlahSahamSetelahTindakan": 14731366060.0
-        },
-        {
-          "id": 60726,
-          "KodeEmiten": "BPII",
-          "TanggalPencatatan": "2026-01-02T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 425820000.0,
-          "JumlahSahamSetelahTindakan": 9884153240.0
-        },
-        {
-          "id": 60441,
-          "KodeEmiten": "DNAR",
-          "TanggalPencatatan": "2025-12-12T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 145401089.0,
-          "JumlahSahamSetelahTindakan": 16721891185.0
-        },
-        {
-          "id": 60034,
-          "KodeEmiten": "IGAR",
-          "TanggalPencatatan": "2025-11-18T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 44423900.0,
-          "JumlahSahamSetelahTindakan": 927780600.0
-        },
-        {
-          "id": 48839,
-          "KodeEmiten": "JRPT",
-          "TanggalPencatatan": "2025-09-01T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 839280900.0,
-          "JumlahSahamSetelahTindakan": 12910719100.0
-        },
-        {
-          "id": 48623,
-          "KodeEmiten": "MPMX",
-          "TanggalPencatatan": "2025-08-08T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 76000000.0,
-          "JumlahSahamSetelahTindakan": 4386963276.0
-        },
-        {
-          "id": 48475,
-          "KodeEmiten": "BFIN",
-          "TanggalPencatatan": "2025-07-30T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 927732000.0,
-          "JumlahSahamSetelahTindakan": 15039383620.0
-        },
-        {
-          "id": 47757,
-          "KodeEmiten": "PALM",
-          "TanggalPencatatan": "2025-06-03T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 40922700.0,
-          "JumlahSahamSetelahTindakan": 15732874458.0
-        },
-        {
-          "id": 47704,
-          "KodeEmiten": "ULTJ",
-          "TanggalPencatatan": "2025-05-27T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 1155352800.0,
-          "JumlahSahamSetelahTindakan": 10398175200.0
-        },
-        {
-          "id": 47545,
-          "KodeEmiten": "KLBF",
-          "TanggalPencatatan": "2025-05-14T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 61730570.0,
-          "JumlahSahamSetelahTindakan": 46813391540.0
-        },
-        {
-          "id": 44982,
-          "KodeEmiten": "GOTO",
-          "TanggalPencatatan": "2024-11-11T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 0.0,
-          "JumlahSahamSetelahTindakan": 0.0
-        },
-        {
-          "id": 34683,
-          "KodeEmiten": "MIKA",
-          "TanggalPencatatan": "2024-10-21T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 0.0,
-          "JumlahSahamSetelahTindakan": 0.0
-        },
-        {
-          "id": 34666,
-          "KodeEmiten": "ACES",
-          "TanggalPencatatan": "2024-10-18T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 0.0,
-          "JumlahSahamSetelahTindakan": 0.0
-        },
-        {
-          "id": 34043,
-          "KodeEmiten": "DOID",
-          "TanggalPencatatan": "2024-09-13T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 0.0,
-          "JumlahSahamSetelahTindakan": 0.0
-        },
-        {
-          "id": 33915,
-          "KodeEmiten": "LSIP",
-          "TanggalPencatatan": "2024-09-05T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 0.0,
-          "JumlahSahamSetelahTindakan": 0.0
-        },
-        {
-          "id": 33918,
-          "KodeEmiten": "SIMP",
-          "TanggalPencatatan": "2024-09-05T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 0.0,
-          "JumlahSahamSetelahTindakan": 0.0
-        },
-        {
-          "id": 16325,
-          "KodeEmiten": "CTRA",
-          "TanggalPencatatan": "2023-04-05T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 24608142.0,
-          "JumlahSahamSetelahTindakan": 18535695255.0
-        },
-        {
-          "id": 10107,
-          "KodeEmiten": "AKPI",
-          "TanggalPencatatan": "2021-07-07T00:00:00",
-          "JenisTindakan": "Pengurangan Modal",
-          "JumlahSaham": 67752000.0,
-          "JumlahSahamSetelahTindakan": 612248000.0
-        }
-      ]
+      "count": 0,
+      "data": []
     },
     "konversiSaham": {
       "count": 53,
@@ -9569,1201 +11191,8 @@
       ]
     },
     "companyListing": {
-      "count": 149,
-      "data": [
-        {
-          "id": 5134,
-          "KodeEmiten": "TRIL",
-          "TanggalPencatatan": "2008-01-28T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 900000000.0,
-          "JumlahSahamSetelahTindakan": 1200000000.0
-        },
-        {
-          "id": 5132,
-          "KodeEmiten": "BAPA",
-          "TanggalPencatatan": "2008-01-14T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 500000000.0,
-          "JumlahSahamSetelahTindakan": 650000000.0
-        },
-        {
-          "id": 4594,
-          "KodeEmiten": "COWL",
-          "TanggalPencatatan": "2007-12-19T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 250000000.0,
-          "JumlahSahamSetelahTindakan": 250000000.0
-        },
-        {
-          "id": 4650,
-          "KodeEmiten": "ASRI",
-          "TanggalPencatatan": "2007-12-18T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 3142000000.0,
-          "JumlahSahamSetelahTindakan": 3142000000.0
-        },
-        {
-          "id": 5107,
-          "KodeEmiten": "UNTX",
-          "TanggalPencatatan": "2007-12-03T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 8068500.0,
-          "JumlahSahamSetelahTindakan": 26820640.0
-        },
-        {
-          "id": 5298,
-          "KodeEmiten": "PROD",
-          "TanggalPencatatan": "2007-11-06T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 1199728.0,
-          "JumlahSahamSetelahTindakan": 1500000.0
-        },
-        {
-          "id": 4668,
-          "KodeEmiten": "BISI",
-          "TanggalPencatatan": "2007-05-28T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 2100000000.0,
-          "JumlahSahamSetelahTindakan": 3000000000.0
-        },
-        {
-          "id": 4354,
-          "KodeEmiten": "SMSM",
-          "TanggalPencatatan": "2007-01-02T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 141000060.0,
-          "JumlahSahamSetelahTindakan": 1439668860.0
-        },
-        {
-          "id": 6081,
-          "KodeEmiten": "RUIS",
-          "TanggalPencatatan": "2006-07-12T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 770000000.0,
-          "JumlahSahamSetelahTindakan": 770000000.0
-        },
-        {
-          "id": 4294,
-          "KodeEmiten": "PJAA",
-          "TanggalPencatatan": "2004-07-02T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 719999998.0,
-          "JumlahSahamSetelahTindakan": 799999998.0
-        },
-        {
-          "id": 5652,
-          "KodeEmiten": "OCAP",
-          "TanggalPencatatan": "2003-11-10T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 223200000.0,
-          "JumlahSahamSetelahTindakan": 273200000.0
-        },
-        {
-          "id": 6033,
-          "KodeEmiten": "ALKA",
-          "TanggalPencatatan": "2003-04-03T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 80083011.0,
-          "JumlahSahamSetelahTindakan": 101533011.0
-        },
-        {
-          "id": 5758,
-          "KodeEmiten": "ARTA",
-          "TanggalPencatatan": "2002-11-05T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 220000000.0,
-          "JumlahSahamSetelahTindakan": 290000000.0
-        },
-        {
-          "id": 5649,
-          "KodeEmiten": "KREN",
-          "TanggalPencatatan": "2002-06-28T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 265000000.0,
-          "JumlahSahamSetelahTindakan": 365000000.0
-        },
-        {
-          "id": 5846,
-          "KodeEmiten": "SUGI",
-          "TanggalPencatatan": "2002-06-19T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 300000000.0,
-          "JumlahSahamSetelahTindakan": 300000000.0
-        },
-        {
-          "id": 5790,
-          "KodeEmiten": "UNIT",
-          "TanggalPencatatan": "2002-04-18T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 105000000.0,
-          "JumlahSahamSetelahTindakan": 200000000.0
-        },
-        {
-          "id": 4921,
-          "KodeEmiten": "FPNI",
-          "TanggalPencatatan": "2002-03-21T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 343200000.0,
-          "JumlahSahamSetelahTindakan": 410200000.0
-        },
-        {
-          "id": 6229,
-          "KodeEmiten": "FORU",
-          "TanggalPencatatan": "2002-01-19T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 250000000.0,
-          "JumlahSahamSetelahTindakan": 260224000.0
-        },
-        {
-          "id": 6005,
-          "KodeEmiten": "LMAS",
-          "TanggalPencatatan": "2001-12-28T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 643750000.0,
-          "JumlahSahamSetelahTindakan": 693750000.0
-        },
-        {
-          "id": 4814,
-          "KodeEmiten": "CLPI",
-          "TanggalPencatatan": "2001-11-30T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 254700000.0,
-          "JumlahSahamSetelahTindakan": 304700000.0
-        },
-        {
-          "id": 4710,
-          "KodeEmiten": "CNKO",
-          "TanggalPencatatan": "2001-11-21T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 1500000000.0,
-          "JumlahSahamSetelahTindakan": 2300000000.0
-        },
-        {
-          "id": 5546,
-          "KodeEmiten": "IATG",
-          "TanggalPencatatan": "2001-11-15T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 600000000.0,
-          "JumlahSahamSetelahTindakan": 800000000.0
-        },
-        {
-          "id": 5420,
-          "KodeEmiten": "RODA",
-          "TanggalPencatatan": "2001-10-22T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 441000000.0,
-          "JumlahSahamSetelahTindakan": 591000000.0
-        },
-        {
-          "id": 6175,
-          "KodeEmiten": "AIMS",
-          "TanggalPencatatan": "2001-07-20T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 70000000.0,
-          "JumlahSahamSetelahTindakan": 110000000.0
-        },
-        {
-          "id": 4774,
-          "KodeEmiten": "BTON",
-          "TanggalPencatatan": "2001-07-18T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 115000000.0,
-          "JumlahSahamSetelahTindakan": 115000000.0
-        },
-        {
-          "id": 4748,
-          "KodeEmiten": "ARNA",
-          "TanggalPencatatan": "2001-07-17T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 423851000.0,
-          "JumlahSahamSetelahTindakan": 548851000.0
-        },
-        {
-          "id": 5008,
-          "KodeEmiten": "LAPD",
-          "TanggalPencatatan": "2001-07-17T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 155000000.0,
-          "JumlahSahamSetelahTindakan": 155000000.0
-        },
-        {
-          "id": 5647,
-          "KodeEmiten": "AKSI",
-          "TanggalPencatatan": "2001-07-13T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 555000000.0,
-          "JumlahSahamSetelahTindakan": 720000000.0
-        },
-        {
-          "id": 5643,
-          "KodeEmiten": "DEFI",
-          "TanggalPencatatan": "2001-07-06T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 67600000.0,
-          "JumlahSahamSetelahTindakan": 67600000.0
-        },
-        {
-          "id": 5203,
-          "KodeEmiten": "TFCO",
-          "TanggalPencatatan": "2001-05-03T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 736800000.0,
-          "JumlahSahamSetelahTindakan": 930000000.0
-        },
-        {
-          "id": 5374,
-          "KodeEmiten": "INAF",
-          "TanggalPencatatan": "2001-04-17T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 2499999999.0,
-          "JumlahSahamSetelahTindakan": 3096875000.0
-        },
-        {
-          "id": 6047,
-          "KodeEmiten": "PLAS",
-          "TanggalPencatatan": "2001-03-16T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 150000000.0,
-          "JumlahSahamSetelahTindakan": 250000000.0
-        },
-        {
-          "id": 5380,
-          "KodeEmiten": "SCPI",
-          "TanggalPencatatan": "2001-01-05T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 2707200.0,
-          "JumlahSahamSetelahTindakan": 3600000.0
-        },
-        {
-          "id": 5378,
-          "KodeEmiten": "MERK",
-          "TanggalPencatatan": "2000-12-22T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 3920000.0,
-          "JumlahSahamSetelahTindakan": 22400000.0
-        },
-        {
-          "id": 5222,
-          "KodeEmiten": "DLTA",
-          "TanggalPencatatan": "2000-12-21T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 12652015.0,
-          "JumlahSahamSetelahTindakan": 16013181.0
-        },
-        {
-          "id": 4754,
-          "KodeEmiten": "AMFG",
-          "TanggalPencatatan": "2000-12-18T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 147000000.0,
-          "JumlahSahamSetelahTindakan": 434000000.0
-        },
-        {
-          "id": 6151,
-          "KodeEmiten": "ERTX",
-          "TanggalPencatatan": "2000-11-23T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 49118000.0,
-          "JumlahSahamSetelahTindakan": 98236000.0
-        },
-        {
-          "id": 6192,
-          "KodeEmiten": "ALFA",
-          "TanggalPencatatan": "2000-11-01T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 234000000000.0,
-          "JumlahSahamSetelahTindakan": 234468000000.0
-        },
-        {
-          "id": 4512,
-          "KodeEmiten": "INKP",
-          "TanggalPencatatan": "2000-10-22T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 655573528.0,
-          "JumlahSahamSetelahTindakan": 4998349514.0
-        },
-        {
-          "id": 3989,
-          "KodeEmiten": "BASS",
-          "TanggalPencatatan": "2000-10-09T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 1306230800.0,
-          "JumlahSahamSetelahTindakan": 1756311000.0
-        },
-        {
-          "id": 5626,
-          "KodeEmiten": "LPBN",
-          "TanggalPencatatan": "2000-08-16T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 13475052140.0,
-          "JumlahSahamSetelahTindakan": 39112115105.0
-        },
-        {
-          "id": 6028,
-          "KodeEmiten": "MYOH",
-          "TanggalPencatatan": "2000-07-27T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 1531000000.0,
-          "JumlahSahamSetelahTindakan": 1681000000.0
-        },
-        {
-          "id": 5660,
-          "KodeEmiten": "PANS",
-          "TanggalPencatatan": "2000-05-31T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 80000000.0,
-          "JumlahSahamSetelahTindakan": 160000000.0
-        },
-        {
-          "id": 5229,
-          "KodeEmiten": "SIMM",
-          "TanggalPencatatan": "2000-03-28T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 140000000.0,
-          "JumlahSahamSetelahTindakan": 200000000.0
-        },
-        {
-          "id": 4957,
-          "KodeEmiten": "DSFI",
-          "TanggalPencatatan": "2000-03-24T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 125000000.0,
-          "JumlahSahamSetelahTindakan": 175000000.0
-        },
-        {
-          "id": 5335,
-          "KodeEmiten": "BATI",
-          "TanggalPencatatan": "2000-03-22T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 15400000.0,
-          "JumlahSahamSetelahTindakan": 22000000.0
-        },
-        {
-          "id": 5668,
-          "KodeEmiten": "TRIM",
-          "TanggalPencatatan": "2000-01-31T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 150000000.0,
-          "JumlahSahamSetelahTindakan": 200000000.0
-        },
-        {
-          "id": 6191,
-          "KodeEmiten": "ALFA",
-          "TanggalPencatatan": "2000-01-18T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 368000000.0,
-          "JumlahSahamSetelahTindakan": 468000000.0
-        },
-        {
-          "id": 5423,
-          "KodeEmiten": "BMSR",
-          "TanggalPencatatan": "1999-12-29T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 206000000.0,
-          "JumlahSahamSetelahTindakan": 336000000.0
-        },
-        {
-          "id": 6117,
-          "KodeEmiten": "TIRT",
-          "TanggalPencatatan": "1999-12-13T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 106000000.0,
-          "JumlahSahamSetelahTindakan": 156000000.0
-        },
-        {
-          "id": 3986,
-          "KodeEmiten": "BASS",
-          "TanggalPencatatan": "1999-11-08T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 234100300.0,
-          "JumlahSahamSetelahTindakan": 318100300.0
-        },
-        {
-          "id": 5624,
-          "KodeEmiten": "LPBN",
-          "TanggalPencatatan": "1999-07-05T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 4883250089.0,
-          "JumlahSahamSetelahTindakan": 9359562669.0
-        },
-        {
-          "id": 5106,
-          "KodeEmiten": "UNTX",
-          "TanggalPencatatan": "1998-02-23T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 8068500.0,
-          "JumlahSahamSetelahTindakan": 18752140.0
-        },
-        {
-          "id": 5121,
-          "KodeEmiten": "RICY",
-          "TanggalPencatatan": "1998-01-21T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 100000000.0,
-          "JumlahSahamSetelahTindakan": 100000000.0
-        },
-        {
-          "id": 5925,
-          "KodeEmiten": "JSPT",
-          "TanggalPencatatan": "1998-01-12T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 486000000.0,
-          "JumlahSahamSetelahTindakan": 536000000.0
-        },
-        {
-          "id": 5528,
-          "KodeEmiten": "SIIP",
-          "TanggalPencatatan": "1998-01-08T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 500000000.0,
-          "JumlahSahamSetelahTindakan": 600000000.0
-        },
-        {
-          "id": 5645,
-          "KodeEmiten": "DKFT",
-          "TanggalPencatatan": "1997-11-21T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 39000000.0,
-          "JumlahSahamSetelahTindakan": 65000000.0
-        },
-        {
-          "id": 5920,
-          "KodeEmiten": "SHID",
-          "TanggalPencatatan": "1997-11-13T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 83888000.0,
-          "JumlahSahamSetelahTindakan": 326400000.0
-        },
-        {
-          "id": 5986,
-          "KodeEmiten": "ASGR",
-          "TanggalPencatatan": "1997-11-07T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 23062500.0,
-          "JumlahSahamSetelahTindakan": 65343750.0
-        },
-        {
-          "id": 5195,
-          "KodeEmiten": "SSTM",
-          "TanggalPencatatan": "1997-08-20T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 270306000.0,
-          "JumlahSahamSetelahTindakan": 350306000.0
-        },
-        {
-          "id": 4355,
-          "KodeEmiten": "SSIA",
-          "TanggalPencatatan": "1997-03-27T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 540000000.0,
-          "JumlahSahamSetelahTindakan": 675000000.0
-        },
-        {
-          "id": 6114,
-          "KodeEmiten": "DSUC",
-          "TanggalPencatatan": "1997-03-25T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 150000000.0,
-          "JumlahSahamSetelahTindakan": 200000000.0
-        },
-        {
-          "id": 5463,
-          "KodeEmiten": "MIRA",
-          "TanggalPencatatan": "1997-01-30T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 84000000.0,
-          "JumlahSahamSetelahTindakan": 114000000.0
-        },
-        {
-          "id": 5883,
-          "KodeEmiten": "HERO",
-          "TanggalPencatatan": "1997-01-27T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 14000000.0,
-          "JumlahSahamSetelahTindakan": 235300000.0
-        },
-        {
-          "id": 5315,
-          "KodeEmiten": "STTP",
-          "TanggalPencatatan": "1996-12-16T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 68000000.0,
-          "JumlahSahamSetelahTindakan": 95000000.0
-        },
-        {
-          "id": 4802,
-          "KodeEmiten": "PICO",
-          "TanggalPencatatan": "1996-09-23T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 108000000.0,
-          "JumlahSahamSetelahTindakan": 135500000.0
-        },
-        {
-          "id": 4350,
-          "KodeEmiten": "SMSM",
-          "TanggalPencatatan": "1996-09-09T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 80000000.0,
-          "JumlahSahamSetelahTindakan": 114400000.0
-        },
-        {
-          "id": 5892,
-          "KodeEmiten": "RALS",
-          "TanggalPencatatan": "1996-07-24T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 270000000.0,
-          "JumlahSahamSetelahTindakan": 270000000.0
-        },
-        {
-          "id": 4716,
-          "KodeEmiten": "CTTH",
-          "TanggalPencatatan": "1996-07-03T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 82000000.0,
-          "JumlahSahamSetelahTindakan": 126000000.0
-        },
-        {
-          "id": 6063,
-          "KodeEmiten": "LPLI",
-          "TanggalPencatatan": "1996-05-30T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 56024727.0,
-          "JumlahSahamSetelahTindakan": 192855600.0
-        },
-        {
-          "id": 4753,
-          "KodeEmiten": "AMFG",
-          "TanggalPencatatan": "1995-11-08T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 201000000.0,
-          "JumlahSahamSetelahTindakan": 287000000.0
-        },
-        {
-          "id": 5088,
-          "KodeEmiten": "INDR",
-          "TanggalPencatatan": "1995-10-16T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 147934982.0,
-          "JumlahSahamSetelahTindakan": 501649684.0
-        },
-        {
-          "id": 5394,
-          "KodeEmiten": "MRAT",
-          "TanggalPencatatan": "1995-07-27T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 80000000.0,
-          "JumlahSahamSetelahTindakan": 107000000.0
-        },
-        {
-          "id": 5091,
-          "KodeEmiten": "KARW",
-          "TanggalPencatatan": "1994-12-20T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 45000000.0,
-          "JumlahSahamSetelahTindakan": 65000000.0
-        },
-        {
-          "id": 4963,
-          "KodeEmiten": "KIAS",
-          "TanggalPencatatan": "1994-12-08T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 60000000.0,
-          "JumlahSahamSetelahTindakan": 85000000.0
-        },
-        {
-          "id": 5365,
-          "KodeEmiten": "DVLA",
-          "TanggalPencatatan": "1994-11-11T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 20670000.0,
-          "JumlahSahamSetelahTindakan": 30670000.0
-        },
-        {
-          "id": 5452,
-          "KodeEmiten": "DUTI",
-          "TanggalPencatatan": "1994-11-02T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 200000000.0,
-          "JumlahSahamSetelahTindakan": 225000000.0
-        },
-        {
-          "id": 5264,
-          "KodeEmiten": "PSDN",
-          "TanggalPencatatan": "1994-10-18T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 90000000.0,
-          "JumlahSahamSetelahTindakan": 120000000.0
-        },
-        {
-          "id": 5409,
-          "KodeEmiten": "LMPI",
-          "TanggalPencatatan": "1994-10-17T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 41000000.0,
-          "JumlahSahamSetelahTindakan": 41000000.0
-        },
-        {
-          "id": 5136,
-          "KodeEmiten": "BIMA",
-          "TanggalPencatatan": "1994-08-30T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 15000000.0,
-          "JumlahSahamSetelahTindakan": 25000000.0
-        },
-        {
-          "id": 5220,
-          "KodeEmiten": "DLTA",
-          "TanggalPencatatan": "1994-08-04T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 795693.0,
-          "JumlahSahamSetelahTindakan": 2940819.0
-        },
-        {
-          "id": 5269,
-          "KodeEmiten": "ADES",
-          "TanggalPencatatan": "1994-06-13T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 23000000.0,
-          "JumlahSahamSetelahTindakan": 111720000.0
-        },
-        {
-          "id": 4925,
-          "KodeEmiten": "SIMA",
-          "TanggalPencatatan": "1994-06-03T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 30000000.0,
-          "JumlahSahamSetelahTindakan": 35000000.0
-        },
-        {
-          "id": 5348,
-          "KodeEmiten": "GGRM",
-          "TanggalPencatatan": "1994-05-31T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 384817600.0,
-          "JumlahSahamSetelahTindakan": 481022000.0
-        },
-        {
-          "id": 6207,
-          "KodeEmiten": "PTSP",
-          "TanggalPencatatan": "1994-05-30T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 22000000.0,
-          "JumlahSahamSetelahTindakan": 31000000.0
-        },
-        {
-          "id": 5687,
-          "KodeEmiten": "ASBI",
-          "TanggalPencatatan": "1994-04-13T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 3600000.0,
-          "JumlahSahamSetelahTindakan": 4600000.0
-        },
-        {
-          "id": 5498,
-          "KodeEmiten": "PTRA",
-          "TanggalPencatatan": "1994-03-28T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 225000000.0,
-          "JumlahSahamSetelahTindakan": 315000000.0
-        },
-        {
-          "id": 5767,
-          "KodeEmiten": "LPPS",
-          "TanggalPencatatan": "1994-03-28T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 14500000.0,
-          "JumlahSahamSetelahTindakan": 28000000.0
-        },
-        {
-          "id": 5206,
-          "KodeEmiten": "TEJA",
-          "TanggalPencatatan": "1994-03-10T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 80000000.0,
-          "JumlahSahamSetelahTindakan": 100000000.0
-        },
-        {
-          "id": 4682,
-          "KodeEmiten": "MBAI",
-          "TanggalPencatatan": "1994-02-28T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 28104080.0,
-          "JumlahSahamSetelahTindakan": 38104080.0
-        },
-        {
-          "id": 5740,
-          "KodeEmiten": "PNIN",
-          "TanggalPencatatan": "1993-12-16T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 607700.0,
-          "JumlahSahamSetelahTindakan": 781233574.0
-        },
-        {
-          "id": 5104,
-          "KodeEmiten": "UNTX",
-          "TanggalPencatatan": "1993-12-09T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 1584360.0,
-          "JumlahSahamSetelahTindakan": 4698280.0
-        },
-        {
-          "id": 5403,
-          "KodeEmiten": "KICI",
-          "TanggalPencatatan": "1993-10-28T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 40000000.0,
-          "JumlahSahamSetelahTindakan": 50000000.0
-        },
-        {
-          "id": 5109,
-          "KodeEmiten": "ADMG",
-          "TanggalPencatatan": "1993-10-20T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 60000000.0,
-          "JumlahSahamSetelahTindakan": 80000000.0
-        },
-        {
-          "id": 5200,
-          "KodeEmiten": "TFCO",
-          "TanggalPencatatan": "1993-08-03T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 940000.0,
-          "JumlahSahamSetelahTindakan": 2975000.0
-        },
-        {
-          "id": 5862,
-          "KodeEmiten": "TIRA",
-          "TanggalPencatatan": "1993-07-27T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 8000000.0,
-          "JumlahSahamSetelahTindakan": 10000000.0
-        },
-        {
-          "id": 4932,
-          "KodeEmiten": "TRST",
-          "TanggalPencatatan": "1993-07-12T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 38610000.0,
-          "JumlahSahamSetelahTindakan": 48000000.0
-        },
-        {
-          "id": 5232,
-          "KodeEmiten": "KBLI",
-          "TanggalPencatatan": "1993-07-06T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 40000000.0,
-          "JumlahSahamSetelahTindakan": 50000000.0
-        },
-        {
-          "id": 5103,
-          "KodeEmiten": "UNTX",
-          "TanggalPencatatan": "1993-06-16T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 1380920.0,
-          "JumlahSahamSetelahTindakan": 3113920.0
-        },
-        {
-          "id": 4307,
-          "KodeEmiten": "PNBN",
-          "TanggalPencatatan": "1993-05-28T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 9600000.0,
-          "JumlahSahamSetelahTindakan": 65422850.0
-        },
-        {
-          "id": 5218,
-          "KodeEmiten": "DLTA",
-          "TanggalPencatatan": "1993-05-21T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 15000.0,
-          "JumlahSahamSetelahTindakan": 715042.0
-        },
-        {
-          "id": 6199,
-          "KodeEmiten": "BAYU",
-          "TanggalPencatatan": "1993-04-23T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 4000000.0,
-          "JumlahSahamSetelahTindakan": 6000000.0
-        },
-        {
-          "id": 4931,
-          "KodeEmiten": "TRST",
-          "TanggalPencatatan": "1993-02-11T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 390000.0,
-          "JumlahSahamSetelahTindakan": 9390000.0
-        },
-        {
-          "id": 4145,
-          "KodeEmiten": "CFIN",
-          "TanggalPencatatan": "1993-01-19T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 1475000.0,
-          "JumlahSahamSetelahTindakan": 2975000.0
-        },
-        {
-          "id": 4849,
-          "KodeEmiten": "SRSN",
-          "TanggalPencatatan": "1993-01-11T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 12000000.0,
-          "JumlahSahamSetelahTindakan": 17000000.0
-        },
-        {
-          "id": 4271,
-          "KodeEmiten": "MYOR",
-          "TanggalPencatatan": "1992-12-30T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 14490000.0,
-          "JumlahSahamSetelahTindakan": 94500000.0
-        },
-        {
-          "id": 4328,
-          "KodeEmiten": "SMAR",
-          "TanggalPencatatan": "1992-11-20T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 120000000.0,
-          "JumlahSahamSetelahTindakan": 150000000.0
-        },
-        {
-          "id": 5070,
-          "KodeEmiten": "ESTI",
-          "TanggalPencatatan": "1992-10-13T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 30000000.0,
-          "JumlahSahamSetelahTindakan": 34000000.0
-        },
-        {
-          "id": 5436,
-          "KodeEmiten": "DILD",
-          "TanggalPencatatan": "1992-09-10T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 29000000.0,
-          "JumlahSahamSetelahTindakan": 41000000.0
-        },
-        {
-          "id": 5250,
-          "KodeEmiten": "IKBI",
-          "TanggalPencatatan": "1992-09-01T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 17500000.0,
-          "JumlahSahamSetelahTindakan": 22500000.0
-        },
-        {
-          "id": 5887,
-          "KodeEmiten": "MTSM",
-          "TanggalPencatatan": "1992-08-12T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 7500000.0,
-          "JumlahSahamSetelahTindakan": 13500000.0
-        },
-        {
-          "id": 5102,
-          "KodeEmiten": "UNTX",
-          "TanggalPencatatan": "1992-07-07T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 999500.0,
-          "JumlahSahamSetelahTindakan": 1733000.0
-        },
-        {
-          "id": 5616,
-          "KodeEmiten": "LPBN",
-          "TanggalPencatatan": "1992-06-26T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 27875000.0,
-          "JumlahSahamSetelahTindakan": 47610000.0
-        },
-        {
-          "id": 5945,
-          "KodeEmiten": "PLIN",
-          "TanggalPencatatan": "1992-06-15T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 80000000.0,
-          "JumlahSahamSetelahTindakan": 115000000.0
-        },
-        {
-          "id": 5243,
-          "KodeEmiten": "KBLM",
-          "TanggalPencatatan": "1992-06-01T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 10900000.0,
-          "JumlahSahamSetelahTindakan": 14000000.0
-        },
-        {
-          "id": 4869,
-          "KodeEmiten": "KKGI",
-          "TanggalPencatatan": "1992-01-28T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 16000000.0,
-          "JumlahSahamSetelahTindakan": 25000000.0
-        },
-        {
-          "id": 5116,
-          "KodeEmiten": "POLY",
-          "TanggalPencatatan": "1992-01-03T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 80000000.0,
-          "JumlahSahamSetelahTindakan": 92000000.0
-        },
-        {
-          "id": 4909,
-          "KodeEmiten": "DYNA",
-          "TanggalPencatatan": "1991-12-24T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 5500000.0,
-          "JumlahSahamSetelahTindakan": 10500000.0
-        },
-        {
-          "id": 5127,
-          "KodeEmiten": "RDTX",
-          "TanggalPencatatan": "1991-12-20T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 9000000.0,
-          "JumlahSahamSetelahTindakan": 94000000.0
-        },
-        {
-          "id": 4596,
-          "KodeEmiten": "ASII",
-          "TanggalPencatatan": "1991-12-18T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 184893000.0,
-          "JumlahSahamSetelahTindakan": 239698000.0
-        },
-        {
-          "id": 4823,
-          "KodeEmiten": "DPNS",
-          "TanggalPencatatan": "1991-12-12T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 13164000.0,
-          "JumlahSahamSetelahTindakan": 25164000.0
-        },
-        {
-          "id": 6148,
-          "KodeEmiten": "ERTX",
-          "TanggalPencatatan": "1991-12-11T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 6139750.0,
-          "JumlahSahamSetelahTindakan": 12279500.0
-        },
-        {
-          "id": 4883,
-          "KodeEmiten": "UNIC",
-          "TanggalPencatatan": "1991-12-03T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 600000.0,
-          "JumlahSahamSetelahTindakan": 66000000.0
-        },
-        {
-          "id": 4940,
-          "KodeEmiten": "CPIN",
-          "TanggalPencatatan": "1991-11-11T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 45000000.0,
-          "JumlahSahamSetelahTindakan": 52500000.0
-        },
-        {
-          "id": 4907,
-          "KodeEmiten": "DYNA",
-          "TanggalPencatatan": "1991-08-05T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 2500000.0,
-          "JumlahSahamSetelahTindakan": 2500000.0
-        },
-        {
-          "id": 4868,
-          "KodeEmiten": "KKGI",
-          "TanggalPencatatan": "1991-07-01T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 4500000.0,
-          "JumlahSahamSetelahTindakan": 9000000.0
-        },
-        {
-          "id": 5855,
-          "KodeEmiten": "TGKA",
-          "TanggalPencatatan": "1991-06-17T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 7000000.0,
-          "JumlahSahamSetelahTindakan": 13500000.0
-        },
-        {
-          "id": 5854,
-          "KodeEmiten": "TGKA",
-          "TanggalPencatatan": "1991-04-22T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 1580000.0,
-          "JumlahSahamSetelahTindakan": 6500000.0
-        },
-        {
-          "id": 5249,
-          "KodeEmiten": "IKBI",
-          "TanggalPencatatan": "1991-01-21T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 1500000.0,
-          "JumlahSahamSetelahTindakan": 5000000.0
-        },
-        {
-          "id": 5631,
-          "KodeEmiten": "BBLD",
-          "TanggalPencatatan": "1991-01-16T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 365000.0,
-          "JumlahSahamSetelahTindakan": 15000000.0
-        },
-        {
-          "id": 4991,
-          "KodeEmiten": "GJTL",
-          "TanggalPencatatan": "1990-11-27T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 75000000.0,
-          "JumlahSahamSetelahTindakan": 100000000.0
-        },
-        {
-          "id": 5347,
-          "KodeEmiten": "GGRM",
-          "TanggalPencatatan": "1990-08-27T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 38396600.0,
-          "JumlahSahamSetelahTindakan": 96204400.0
-        },
-        {
-          "id": 5615,
-          "KodeEmiten": "LPBN",
-          "TanggalPencatatan": "1990-08-27T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 5000000.0,
-          "JumlahSahamSetelahTindakan": 19735000.0
-        },
-        {
-          "id": 4821,
-          "KodeEmiten": "DPNS",
-          "TanggalPencatatan": "1990-08-08T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 3000000.0,
-          "JumlahSahamSetelahTindakan": 6000000.0
-        },
-        {
-          "id": 5772,
-          "KodeEmiten": "INCF",
-          "TanggalPencatatan": "1990-07-27T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 10000000.0,
-          "JumlahSahamSetelahTindakan": 11200000.0
-        },
-        {
-          "id": 6030,
-          "KodeEmiten": "ALKA",
-          "TanggalPencatatan": "1990-07-12T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 5000000.0,
-          "JumlahSahamSetelahTindakan": 6500000.0
-        },
-        {
-          "id": 4267,
-          "KodeEmiten": "MYOR",
-          "TanggalPencatatan": "1990-07-04T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 3300000.0,
-          "JumlahSahamSetelahTindakan": 6300000.0
-        },
-        {
-          "id": 4777,
-          "KodeEmiten": "CTBN",
-          "TanggalPencatatan": "1990-07-02T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 3600000.0,
-          "JumlahSahamSetelahTindakan": 5200000.0
-        },
-        {
-          "id": 5853,
-          "KodeEmiten": "TGKA",
-          "TanggalPencatatan": "1990-06-19T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 2420000.0,
-          "JumlahSahamSetelahTindakan": 4920000.0
-        },
-        {
-          "id": 4990,
-          "KodeEmiten": "GJTL",
-          "TanggalPencatatan": "1990-05-25T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 5000000.0,
-          "JumlahSahamSetelahTindakan": 25000000.0
-        },
-        {
-          "id": 5443,
-          "KodeEmiten": "DART",
-          "TanggalPencatatan": "1990-05-08T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 6250000.0,
-          "JumlahSahamSetelahTindakan": 16250000.0
-        },
-        {
-          "id": 4881,
-          "KodeEmiten": "UNIC",
-          "TanggalPencatatan": "1990-04-06T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 51000000.0,
-          "JumlahSahamSetelahTindakan": 60000000.0
-        },
-        {
-          "id": 5563,
-          "KodeEmiten": "RIGS",
-          "TanggalPencatatan": "1990-03-05T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 15456500.0,
-          "JumlahSahamSetelahTindakan": 30456500.0
-        },
-        {
-          "id": 5274,
-          "KodeEmiten": "AQUA",
-          "TanggalPencatatan": "1990-03-01T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 5000000.0,
-          "JumlahSahamSetelahTindakan": 6000000.0
-        },
-        {
-          "id": 4903,
-          "KodeEmiten": "BRNA",
-          "TanggalPencatatan": "1989-11-15T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 4000000.0,
-          "JumlahSahamSetelahTindakan": 5750000.0
-        },
-        {
-          "id": 5506,
-          "KodeEmiten": "PWON",
-          "TanggalPencatatan": "1989-10-09T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 17000000.0,
-          "JumlahSahamSetelahTindakan": 20000000.0
-        },
-        {
-          "id": 5676,
-          "KodeEmiten": "ABDA",
-          "TanggalPencatatan": "1989-08-25T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 4500000.0,
-          "JumlahSahamSetelahTindakan": 5400000.0
-        },
-        {
-          "id": 4581,
-          "KodeEmiten": "PNLF",
-          "TanggalPencatatan": "1989-06-12T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 980000.0,
-          "JumlahSahamSetelahTindakan": 2000000.0
-        },
-        {
-          "id": 5214,
-          "KodeEmiten": "DLTA",
-          "TanggalPencatatan": "1987-04-14T00:00:00",
-          "JenisTindakan": "Company Listing",
-          "JumlahSaham": 1719.0,
-          "JumlahSahamSetelahTindakan": 390807.0
-        }
-      ]
+      "count": 0,
+      "data": []
     },
     "partialDelisting": {
       "count": 35,
