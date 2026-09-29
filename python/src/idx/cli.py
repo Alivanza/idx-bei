@@ -6,6 +6,7 @@ Entry point for `idx` executable and `python cli.py`.
 
 import argparse
 import logging
+import sys
 
 import pandas as pd
 
@@ -450,7 +451,29 @@ def main(argv=None):
                 print(df.to_string(index=False))
     elif cmd == "daily":
         print(f"=== Daily Ingestion ({args.date or 'today'}) ===")
-        ingest_daily(date=args.date)
+        results = ingest_daily(date=args.date)
+        # Surface a real fetch failure as a non-zero exit. Previously nothing here
+        # checked `results` at all, so daily.yml's "uv run idx daily" step always
+        # exited 0 -- even the day a dataset's fetch genuinely failed -- and the
+        # workflow's later `git diff --cached --quiet || git commit` step would
+        # still commit whatever OTHER datasets did update, showing a green run
+        # with no visible signal that stock_summary specifically never advanced.
+        # See _ingest_dataset()'s docstring in pipelines/daily.py for the other
+        # half of this fix (raise_on_error=True, so a real failure actually
+        # reaches `results[dataset]["status"] == "error"` instead of being
+        # reported as "no_data").
+        failed = sorted(
+            dataset
+            for dataset, result in results.items()
+            if isinstance(result, dict) and result.get("status") == "error"
+        )
+        if failed:
+            print(
+                f"ERROR: ingestion failed for: {', '.join(failed)} "
+                "(see log output above for each dataset's specific error)",
+                file=sys.stderr,
+            )
+            sys.exit(1)
     elif cmd == "backtest":
         from idx.backtest import run_backtest
 

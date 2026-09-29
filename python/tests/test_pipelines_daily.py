@@ -16,7 +16,7 @@ class FakeClient:
         self.calls = []
 
     def get_json(self, endpoint, params=None, **kwargs):
-        self.calls.append((endpoint, params))
+        self.calls.append((endpoint, params, kwargs))
         result = self.responses.get(endpoint)
         if isinstance(result, Exception):
             raise result
@@ -47,6 +47,11 @@ class TestIngestDataset:
         assert result["status"] == "ok"
         assert result["records"] == 1
         assert set(ts.existing_dates("stock_summary")) == {"2026-01-05"}
+        # raise_on_error=True is the whole fix (see _ingest_dataset's docstring) --
+        # assert it's actually passed, not just that this happy path still works.
+        assert len(client.calls) == 1
+        _endpoint, _params, call_kwargs = client.calls[0]
+        assert call_kwargs.get("raise_on_error") is True
 
     def test_skips_existing_date(self, ts_dir):
         ts.write_partition(
@@ -66,12 +71,46 @@ class TestIngestDataset:
         )
         assert result["status"] == "no_data"
 
-    def test_handles_none_response(self, ts_dir):
+    def test_defensive_fallback_if_get_json_somehow_still_returns_none(self, ts_dir):
+        """With raise_on_error=True, the real client should never return bare None
+        on failure (it raises IDXRequestError instead -- see the next test). This
+        only exercises _ingest_dataset's own defensive `isinstance(data, dict)`
+        guard for a None value, in case some future caller's get_json stand-in
+        returns it directly; it is not simulating a real fetch failure anymore."""
         client = FakeClient({"/TradingSummary/GetBrokerSummary": None})
         result = daily_mod._ingest_dataset(
             client, "broker_summary", "/TradingSummary/GetBrokerSummary", "20260105", "2026-01-05"
         )
         assert result["status"] == "no_data"
+
+    def test_real_fetch_failure_propagates_instead_of_being_treated_as_no_data(self, ts_dir):
+        """The actual bug: a real fetch failure (bad HTTP status, exhausted
+        retries, a WAF block against the shared GitHub Actions runner IP pool --
+        whatever the cause) must surface as a raised error, not silently collapse
+        into the same 'no_data (non-trading day?)' status a genuinely empty
+        response gets. This is what let stock_summary.parquet freeze at
+        2026-09-11 while daily.yml kept reporting a green run."""
+        from idx.core.client import IDXRequestError
+
+        client = FakeClient(
+            {
+                "/TradingSummary/GetStockSummary": IDXRequestError(
+                    "HTTP 403 for /TradingSummary/GetStockSummary", status_code=403
+                )
+            }
+        )
+        with pytest.raises(IDXRequestError):
+            daily_mod._ingest_dataset(
+                client,
+                "stock_summary",
+                "/TradingSummary/GetStockSummary",
+                "20260105",
+                "2026-01-05",
+            )
+        # And critically: nothing got written for this date, so a later retry
+        # (once the block clears) will correctly see it as still missing --
+        # existing_dates() must NOT show 2026-01-05 as already handled.
+        assert "2026-01-05" not in ts.existing_dates("stock_summary")
 
 
 class TestIngestDaily:

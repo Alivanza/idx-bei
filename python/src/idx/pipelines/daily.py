@@ -34,13 +34,40 @@ def _ingest_dataset(client, dataset, endpoint, date, date_iso):
 
     Returns:
         dict with 'status' and record counts.
+
+    Raises:
+        idx.core.client.IDXRequestError: if the fetch itself failed (max retries
+            exceeded, a non-200 HTTP status, or undecodable JSON). This is
+            deliberate -- see the raise_on_error=True below. A real fetch failure
+            (e.g. IDX's site blocking a GitHub Actions runner's IP) must be
+            distinguishable from a genuinely empty response on a non-trading day.
+            Conflating the two here previously made get_json() return None on
+            EITHER case, which this function then logged as merely
+            "no data (non-trading day?)" and returned as status "no_data" -- not an
+            error. ingest_daily()'s caller loop only ever sees a raised exception as
+            a real failure (status "error"); everything else, "no_data" included,
+            was treated as a normal, successful outcome. That is how
+            stock_summary.parquet silently froze at 2026-09-11 while daily.yml kept
+            reporting green: the fetch was failing (most likely a WAF/IP-reputation
+            block against the shared GitHub-hosted runner IP pool -- broker_summary
+            and index_summary, hit by the same client against the same site, failed
+            intermittently too, on different specific days), get_json() swallowed
+            that into None, and this function reported "no_data" for a day that
+            objectively had trading (IDX was open). Passing raise_on_error=True
+            here means a real failure now raises IDXRequestError, which the
+            existing try/except in ingest_daily()'s loop already catches and
+            correctly records as status "error" -- and idx.cli's "daily" command
+            now exits non-zero when that happens (see cli.py), which is what turns
+            the GitHub Actions run red instead of silently green.
     """
     have = ts.existing_dates(dataset)
     if date_iso in have:
         log.info("%s for %s already exists, skipping", dataset, date_iso)
         return {"status": "skipped"}
 
-    data = client.get_json(endpoint, params={"date": date, "start": 0, "length": 9999})
+    data = client.get_json(
+        endpoint, params={"date": date, "start": 0, "length": 9999}, raise_on_error=True
+    )
     records = data.get("data") if isinstance(data, dict) else None
 
     if not isinstance(records, list) or len(records) == 0:

@@ -66,6 +66,21 @@ var LEGACY_SHORTLIST_TAB_NAME = "Latest_Top8";
 // indices in formatTop8Rows/writeAllPassers/writeAllTickers below, all changed to match.
 var TOP_HEADERS = ["RunDate", "LastTradingDate", "Ticker", "Name", "Sector", "LastPrice", "LotCost",
                     "ADTV20", "ATR14_pct", "High20", "DistToHigh20", "ATRsBelowHigh", "BreakoutLast3", "Source"];
+
+// Screen_Log uses a DIFFERENT column order from TOP_HEADERS above: High20 is appended as the
+// LAST column here instead of inserted between ATR14_pct and DistToHigh20. Reason: Shortlist
+// (writeLatestTop8) calls sh.clear() and rewrites every cell on every run, so inserting
+// High20 wherever reads best costs nothing there. Screen_Log is append-only history that
+// already had thousands of rows written under the OLD 13-column schema before High20
+// existed -- inserting a 14th field in the MIDDLE of that would silently shift every later
+// field (DistToHigh20, ATRsBelowHigh, BreakoutLast3, Source) one column out from under its
+// header for every pre-High20 row. Appending at the end instead means old rows just read
+// blank for High20 (an honest "not computed for this row"), and nothing that was already
+// correct moves. See getOrCreateScreenLogSheet() below for the one-time header migration
+// this required on an existing Screen_Log tab.
+var SCREENLOG_HEADERS = ["RunDate", "LastTradingDate", "Ticker", "Name", "Sector", "LastPrice", "LotCost",
+                          "ADTV20", "ATR14_pct", "DistToHigh20", "ATRsBelowHigh", "BreakoutLast3", "Source",
+                          "High20"];
 var ALLPASSERS_HEADERS = ["RunDate", "LastTradingDate", "Ticker", "Name", "Sector", "LastPrice",
                            "ADTV20", "ATR14_pct", "High20", "DistToHigh20", "ATRsBelowHigh", "BreakoutLast3",
                            "IncludedInShortlist"];
@@ -108,6 +123,28 @@ function doPost(e) {
       .setMimeType(ContentService.MimeType.TEXT);
   }
 
+  // One-time historical pull for Daily All Tickers (backfill_daily_prices.py): a chunk of
+  // full-universe OHLCV rows for one or more trading days. Mirrors the "backfill" branch
+  // above -- deliberately does not touch Shortlist/Screen_Log/All_Passers/etc.
+  if (body.mode === "prices_init") {
+    var priceRows = body.rows || [];
+    appendDailyPricesInit(ss, priceRows);
+    return ContentService.createTextOutput(
+      "OK prices_init: " + priceRows.length + " row(s) appended to " + DAILY_PRICES_TAB_NAME
+    ).setMimeType(ContentService.MimeType.TEXT);
+  }
+
+  // Ongoing daily update for Daily All Tickers (daily_screen.py's post_daily_prices()): one
+  // trading day's full-universe OHLCV, posted alongside (not instead of) the normal screen
+  // payload below.
+  if (body.mode === "prices_daily") {
+    var dailyRows = body.rows || [];
+    appendDailyPrices(ss, dailyRows, body.date);
+    return ContentService.createTextOutput(
+      "OK prices_daily (" + body.date + "): " + dailyRows.length + " row(s) written to " + DAILY_PRICES_TAB_NAME
+    ).setMimeType(ContentService.MimeType.TEXT);
+  }
+
   writeLatestTop8(ss, body);
   appendToLog(ss, body);
   writeAllPassers(ss, body);
@@ -118,7 +155,7 @@ function doPost(e) {
   buildGuideTab(ss); // static content, cheap to rebuild -- keeps it in sync with this script
   buildLiveWatchTab(ss); // formulas only, re-pointed at today's Shortlist rows each run
   buildLiveWatchPassersTab(ss); // same idea, sourced from All_Passers instead
-  buildLiveWatchAllTickersTab(ss); // same idea again, capped to the top-250-by-ADTV20 of All_Tickers
+  buildLiveWatchAllTickersTab(ss); // same idea again, capped to the top-100-by-ADTV20 of All_Tickers
 
   return ContentService.createTextOutput("OK").setMimeType(ContentService.MimeType.TEXT);
 }
@@ -179,6 +216,42 @@ function formatTop8Rows(sh, startRow, numRows) {
   borderRange(sh.getRange(startRow, 1, numRows, TOP_HEADERS.length));
 }
 
+// Column formats for Screen_Log's layout (see SCREENLOG_HEADERS comment for why it differs
+// from formatTop8Rows above): High20 is column 14, not column 10.
+function formatScreenLogRows(sh, startRow, numRows) {
+  if (numRows <= 0) return;
+  sh.getRange(startRow, 1, numRows, 1).setNumberFormat("yyyy-mm-dd");      // RunDate
+  sh.getRange(startRow, 2, numRows, 1).setNumberFormat("yyyy-mm-dd");      // LastTradingDate
+  sh.getRange(startRow, 6, numRows, 1).setNumberFormat("#,##0");           // LastPrice (IDR)
+  sh.getRange(startRow, 7, numRows, 1).setNumberFormat("#,##0");           // LotCost (IDR)
+  sh.getRange(startRow, 8, numRows, 1).setNumberFormat("#,##0");           // ADTV20 (IDR)
+  sh.getRange(startRow, 9, numRows, 1).setNumberFormat("0.00%");           // ATR14_pct
+  sh.getRange(startRow, 10, numRows, 1).setNumberFormat("0.00%");          // DistToHigh20
+  sh.getRange(startRow, 11, numRows, 1).setNumberFormat("0.00");           // ATRsBelowHigh
+  sh.getRange(startRow, 14, numRows, 1).setNumberFormat("#,##0");          // High20 (IDR)
+  borderRange(sh.getRange(startRow, 1, numRows, SCREENLOG_HEADERS.length));
+}
+
+// One-time migration for an existing Screen_Log tab written before High20 existed: its
+// header row (row 1) is never rewritten by appendToLog/appendToLogBulk once the sheet has
+// data (they only write headers on a brand-new, empty sheet -- see isNew in both), so a
+// pre-High20 Screen_Log is stuck showing the old 13-column header even after this update
+// ships. If "High20" isn't in the current header, patch just row 1 to SCREENLOG_HEADERS;
+// every already-written data row is left exactly as it was -- its new High20 cell (column
+// 14, past its own last real value) simply reads blank, which is accurate: that value was
+// never computed for it.
+function getOrCreateScreenLogSheet(ss) {
+  var sh = getOrCreateSheet(ss, "Screen_Log");
+  if (sh.getLastRow() > 0) {
+    var currentHeader = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+    if (currentHeader.indexOf("High20") === -1) {
+      sh.getRange(1, 1, 1, SCREENLOG_HEADERS.length).setValues([SCREENLOG_HEADERS]);
+      styleHeaderRow(sh, SCREENLOG_HEADERS.length);
+    }
+  }
+  return sh;
+}
+
 // ---- Data tabs -------------------------------------------------------------------
 
 function writeLatestTop8(ss, body) {
@@ -219,24 +292,24 @@ function removeExistingLogRows(sh, lastTradingDate) {
 }
 
 function appendToLog(ss, body) {
-  var sh = getOrCreateSheet(ss, "Screen_Log");
+  var sh = getOrCreateScreenLogSheet(ss);
   var isNew = sh.getLastRow() === 0;
   if (isNew) {
-    sh.getRange(1, 1, 1, TOP_HEADERS.length).setValues([TOP_HEADERS]);
-    styleHeaderRow(sh, TOP_HEADERS.length);
-    sh.setColumnWidths(1, TOP_HEADERS.length, 110);
+    sh.getRange(1, 1, 1, SCREENLOG_HEADERS.length).setValues([SCREENLOG_HEADERS]);
+    styleHeaderRow(sh, SCREENLOG_HEADERS.length);
+    sh.setColumnWidths(1, SCREENLOG_HEADERS.length, 110);
     sh.setColumnWidth(4, 200);
   } else {
     removeExistingLogRows(sh, body.last_trading_date);
   }
   var rows = (body.top || []).map(function (r) {
     return [body.run_date, body.last_trading_date, r.Ticker, r.Name, r.Sector, r.LastPrice, r.LotCost,
-            r.ADTV20, r.ATR14_pct, r.High20, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.Source || "Live"];
+            r.ADTV20, r.ATR14_pct, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.Source || "Live", r.High20];
   });
   if (rows.length) {
     var startRow = sh.getLastRow() + 1;
-    sh.getRange(startRow, 1, rows.length, TOP_HEADERS.length).setValues(rows);
-    formatTop8Rows(sh, startRow, rows.length);
+    sh.getRange(startRow, 1, rows.length, SCREENLOG_HEADERS.length).setValues(rows);
+    formatScreenLogRows(sh, startRow, rows.length);
   }
 }
 
@@ -253,12 +326,12 @@ function appendToLog(ss, body) {
 // single setValues() call. Cost per POST call is now O(sheet size) once, not O(30 x sheet
 // size), independent of batch_size.
 function appendToLogBulk(ss, runs) {
-  var sh = getOrCreateSheet(ss, "Screen_Log");
+  var sh = getOrCreateScreenLogSheet(ss);
   var isNew = sh.getLastRow() === 0;
   if (isNew) {
-    sh.getRange(1, 1, 1, TOP_HEADERS.length).setValues([TOP_HEADERS]);
-    styleHeaderRow(sh, TOP_HEADERS.length);
-    sh.setColumnWidths(1, TOP_HEADERS.length, 110);
+    sh.getRange(1, 1, 1, SCREENLOG_HEADERS.length).setValues([SCREENLOG_HEADERS]);
+    styleHeaderRow(sh, SCREENLOG_HEADERS.length);
+    sh.setColumnWidths(1, SCREENLOG_HEADERS.length, 110);
     sh.setColumnWidth(4, 200);
   }
 
@@ -284,13 +357,13 @@ function appendToLogBulk(ss, runs) {
   runs.forEach(function (body) {
     (body.top || []).forEach(function (r) {
       allRows.push([body.run_date, body.last_trading_date, r.Ticker, r.Name, r.Sector, r.LastPrice, r.LotCost,
-                    r.ADTV20, r.ATR14_pct, r.High20, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.Source || "Live"]);
+                    r.ADTV20, r.ATR14_pct, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.Source || "Live", r.High20]);
     });
   });
   if (allRows.length) {
     var startRow = sh.getLastRow() + 1;
-    sh.getRange(startRow, 1, allRows.length, TOP_HEADERS.length).setValues(allRows);
-    formatTop8Rows(sh, startRow, allRows.length);
+    sh.getRange(startRow, 1, allRows.length, SCREENLOG_HEADERS.length).setValues(allRows);
+    formatScreenLogRows(sh, startRow, allRows.length);
   }
 }
 
@@ -494,7 +567,7 @@ function buildGuideTab(ss) {
     ["ADTV20", "Average Daily Traded Value over the last 20 sessions, in IDR. Used only to check the F1 liquidity gate -- not used to rank or sort the pass list.", "MEAN(Value) over the most recent 20 trading days.", ""],
     ["ATR14_pct", "14-day Average True Range, scaled to a % of LastPrice -- a volatility measure.",
       "TrueRange = MAX(High-Low, |High-PrevClose|, |Low-PrevClose|); ATR14 = MEAN(TrueRange) over 14 sessions; ATR14_pct = ATR14 / LastPrice.", ""],
-    ["High20", "The 20-day-high price itself, in IDR -- the raw input DistToHigh20 and ATRsBelowHigh are both computed from. Shown so you can rebuild either by hand.", "MAX(High) over the last 20 trading sessions.", ""],
+    ["High20", "The 20-day-high price itself, in IDR -- the raw input DistToHigh20 and ATRsBelowHigh are both computed from. Shown so you can rebuild either by hand. Sits between ATR14_pct and DistToHigh20 in Shortlist/All_Passers/All_Tickers; on Screen_Log specifically it's the LAST column instead (added after that tab already had years of history under a 13-column schema -- inserting it in the middle there would've shifted every later field in every pre-High20 row). Blank on any Screen_Log row from before this field existed.", "MAX(High) over the last 20 trading sessions.", ""],
     ["DistToHigh20", "How far below the 20-day high LastPrice currently sits, as a %.", "(High20 − LastPrice) / High20.", ""],
     ["ATRsBelowHigh", "Same idea as DistToHigh20, but scaled by the stock's OWN volatility instead of price -- a quality measure for a breakout. 0 or negative = at/above the high; 1.0 = pulled back one full average day's range.", "(High20 − LastPrice) / ATR14 (ATR14 in IDR, i.e. ATR14_pct × LastPrice).", ""],
     ["BreakoutLast3", "TRUE if a new 20-day high was set within the last 3 sessions.", "MAX(High) over the last 3 days > MAX(High) over the prior days 4–20.", ""],
@@ -571,7 +644,7 @@ function buildGuideTab(ss) {
     ["Run_Info", "Last run timestamp, universe size, pass count, shortlist size, and this run's specific data-quality caveats.", "", ""],
     ["Live_Watch", "Today's Shortlist tickers with a live(ish) price via GOOGLEFINANCE (Sheets-native, not the Python pipeline) -- ~20 min delayed, and not every smaller IDX ticker has data. For gauging how far price has moved since the screen flagged it, not for order timing. Formulas only, no data of their own -- rebuilt every run, always current as long as the Sheet is open.", "", ""],
     ["Live_Watch_Passers", "Same idea as Live_Watch, but sourced from All_Passers instead of Shortlist -- every ticker that passed all 5 filters today, not just the sector-capped shortlist. Provisioned for up to " + LIVE_WATCH_PASSERS_MAX_ROWS + " tickers.", "", ""],
-    ["Live_Watch_AllTickers", "Same idea again, but sourced from All_Tickers (the full ~950-980 universe) -- capped to the top " + LIVE_WATCH_ALLTICKERS_MAX_ROWS + " tickers by ADTV20 (liquidity), not the whole universe. That cap is a deliberate choice, not a technical wall: GOOGLEFINANCE has no documented limit on concurrent formulas per sheet, and Live_Watch + Live_Watch_Passers + a full-universe version would run roughly 2,700 of them at once with no track record at that scale. 250 was chosen as a liquidity-weighted middle ground; raise LIVE_WATCH_ALLTICKERS_MAX_ROWS in the script if you want more coverage and are willing to test the sheet at that size.", "", ""],
+    ["Live_Watch_AllTickers", "Same idea again, but sourced from All_Tickers (the full ~950-980 universe) -- capped to the top " + LIVE_WATCH_ALLTICKERS_MAX_ROWS + " tickers by ADTV20 (liquidity), not the whole universe. That cap is a deliberate choice, not a technical wall: GOOGLEFINANCE has no documented limit on concurrent formulas per sheet, and Live_Watch + Live_Watch_Passers + a full-universe version would run roughly 2,700 of them at once with no track record at that scale. Started at 250, lowered to " + LIVE_WATCH_ALLTICKERS_MAX_ROWS + " as a more conservative liquidity-weighted middle ground; raise LIVE_WATCH_ALLTICKERS_MAX_ROWS in the script if you want more coverage and are willing to test the sheet at that size.", "", ""],
   ];
   sh.getRange(row, 1, tabs.length, 4).setValues(tabs).setWrap(true).setVerticalAlignment("top");
   borderRange(sh.getRange(tabStart - 1, 1, tabs.length + 1, 4));
@@ -686,10 +759,11 @@ var LIVE_WATCH_PASSERS_MAX_ROWS = 100;
 // more concurrent GOOGLEFINANCE formulas on top of the ~780 Live_Watch + Live_Watch_Passers
 // already use, with no documented ceiling found on how many GOOGLEFINANCE calls a Sheet can
 // run concurrently before slowing down or erroring. Capped middle ground instead: only the
-// most-liquid 250 tickers by ADTV20 (writeAllTickers() sorts All_Tickers by ADTV20 descending
-// specifically so its first 250 rows ARE that top-250 set -- no separate sort needed here).
-// Raise/lower LIVE_WATCH_ALLTICKERS_MAX_ROWS if 250 turns out to be too many or too few.
-var LIVE_WATCH_ALLTICKERS_MAX_ROWS = 250;
+// most-liquid 100 tickers by ADTV20 (writeAllTickers() sorts All_Tickers by ADTV20 descending
+// specifically so its first 100 rows ARE that top-100 set -- no separate sort needed here).
+// Started at 250, lowered to 100 after the first live run -- raise/lower
+// LIVE_WATCH_ALLTICKERS_MAX_ROWS again if 100 turns out to be too many or too few.
+var LIVE_WATCH_ALLTICKERS_MAX_ROWS = 100;
 
 function buildLiveWatchTab(ss) {
   buildLiveWatchFromSource(ss, SHORTLIST_TAB_NAME, "Live_Watch", LIVE_WATCH_MAX_ROWS);
@@ -705,4 +779,204 @@ function buildLiveWatchAllTickersTab(ss) {
     "only live-tracks the top " + LIVE_WATCH_ALLTICKERS_MAX_ROWS + " by that liquidity ranking, not " +
     "every ticker (see Guide for why). A ticker missing here just isn't in the top " +
     LIVE_WATCH_ALLTICKERS_MAX_ROWS + " today -- check All_Tickers directly for its filter results.");
+}
+
+// ---- Daily All Tickers (full-universe OHLCV) --------------------------------------------
+// Replaces the tab's previous content -- a Screen_Log self-join formula that only ever
+// showed a ticker on days it happened to get shortlisted (~15/day out of ~950-980), so it
+// was blank for the vast majority of ticker/date combinations by construction, not by
+// failure. This version is posted data (Open/High/Low/Close/Volume per ticker per day),
+// sourced from stock_summary.parquet via backfill_daily_prices.py (one-time historical
+// load) and daily_screen.py (ongoing daily append) -- see those scripts' docstrings.
+//
+// Long format (one row per ticker per day), not a wide ticker-by-date grid like the old
+// tab: a single grid cell can only hold one value, and OHLCV is 5 values per ticker/day.
+// Use FILTER/QUERY formulas on top of this tab to pivot into a wide view for a specific
+// field if you want one (e.g. Close only) -- that's a spreadsheet-formula job, not
+// something this script needs to pre-build.
+
+var DAILY_PRICES_TAB_NAME = "Daily All Tickers";
+var DAILY_PRICES_HEADERS = ["Ticker", "Name", "Date", "Open", "High", "Low", "Close", "Volume"];
+
+// Resets the tab (clears whatever was there -- the old self-join formula, or a stale
+// schema from an earlier version of this script) only if its header doesn't already match
+// DAILY_PRICES_HEADERS. Once the tab is on this schema, later calls (in either mode) never
+// clear it again -- they only append/replace specific date-rows. This is what makes it
+// safe to call appendDailyPricesInit() across many chunked POSTs without each one wiping
+// the previous chunk's work.
+//
+// IMPORTANT: always reads exactly DAILY_PRICES_HEADERS.length columns (not
+// sh.getLastColumn()) for this comparison. An earlier version used
+// Math.max(sh.getLastColumn(), 1) as the read width, which means ANY stray content or
+// formatting landing in column I or beyond -- e.g. a click/selection in the Sheet UI while
+// a backfill run is in progress -- inflates getLastColumn() past 8, so currentHeader picks
+// up extra trailing blank cells, currentHeader.join("|") no longer equals
+// DAILY_PRICES_HEADERS.join("|"), and this function wipes the ENTIRE tab (sh.clear()) and
+// starts over mid-backfill. That is what corrupted a real backfill run once already --
+// batches from a stray-column event onward were kept, everything posted before it was
+// silently lost even though the client-side script had already checkpointed those dates as
+// successfully posted (Apps Script really did write them; something after that cleared the
+// sheet). Fixed by reading a fixed-width range instead, so extra columns elsewhere on the
+// row can never affect this check.
+function getOrResetDailyPricesSheet(ss) {
+  var sh = getOrCreateSheet(ss, DAILY_PRICES_TAB_NAME);
+  var lastRow = sh.getLastRow();
+  var needsReset = true;
+  if (lastRow > 0) {
+    var currentHeader = sh.getRange(1, 1, 1, DAILY_PRICES_HEADERS.length).getValues()[0];
+    needsReset = currentHeader.join("|") !== DAILY_PRICES_HEADERS.join("|");
+  }
+  if (needsReset) {
+    sh.clear();
+    sh.getRange(1, 1, 1, DAILY_PRICES_HEADERS.length).setValues([DAILY_PRICES_HEADERS]);
+    styleHeaderRow(sh, DAILY_PRICES_HEADERS.length);
+    sh.setColumnWidths(1, DAILY_PRICES_HEADERS.length, 100);
+    sh.setColumnWidth(2, 220); // Name
+  }
+  return sh;
+}
+
+function formatDailyPricesRows(sh, startRow, numRows) {
+  if (numRows <= 0) return;
+  sh.getRange(startRow, 3, numRows, 1).setNumberFormat("yyyy-mm-dd"); // Date
+  sh.getRange(startRow, 4, numRows, 1).setNumberFormat("#,##0");      // Open
+  sh.getRange(startRow, 5, numRows, 1).setNumberFormat("#,##0");      // High
+  sh.getRange(startRow, 6, numRows, 1).setNumberFormat("#,##0");      // Low
+  sh.getRange(startRow, 7, numRows, 1).setNumberFormat("#,##0");      // Close
+  sh.getRange(startRow, 8, numRows, 1).setNumberFormat("#,##0");      // Volume
+}
+
+// mode "prices_init" -- ONE-TIME historical load, called once per chunk by
+// backfill_daily_prices.py. Deliberately does NOT scan for/delete pre-existing rows before
+// appending: the caller guarantees each chunk covers dates that have never been posted
+// before (a fresh tab, loaded date-range by date-range in order), so there is nothing to
+// dedupe against. Skipping that scan matters at this data's scale -- the full historical
+// load is ~339,000 rows, and reading/comparing a column that large on every one of dozens
+// of chunk-POSTs would add real time for no benefit when nothing will ever collide. If you
+// re-run backfill_daily_prices.py after an interrupted run, it resumes from the last
+// checkpoint (see that script) rather than re-POSTing already-landed chunks, so this
+// assumption holds even on a resume.
+function appendDailyPricesInit(ss, rows) {
+  var sh = getOrResetDailyPricesSheet(ss);
+  if (!rows.length) return;
+  var startRow = sh.getLastRow() + 1;
+  sh.getRange(startRow, 1, rows.length, DAILY_PRICES_HEADERS.length).setValues(rows);
+  formatDailyPricesRows(sh, startRow, rows.length);
+}
+
+// mode "prices_daily" -- ONGOING update, one call per trading day from daily_screen.py.
+// Mirrors appendToLogBulk's dedupe pattern elsewhere in this file: one bulk read of the
+// Date column, delete any rows already present for TODAY's date (so a retried/re-run daily
+// post replaces that day's block instead of duplicating it), then bulk-insert. This is a
+// single-date scan even once the tab has hundreds of thousands of historical rows in it --
+// still one bulk getValues() call, not a per-row operation, same as the rest of this file's
+// established pattern.
+function appendDailyPrices(ss, rows, date) {
+  var sh = getOrResetDailyPricesSheet(ss);
+  var lastRow = sh.getLastRow();
+  if (lastRow >= 2) {
+    var tz = Session.getScriptTimeZone();
+    var values = sh.getRange(2, 3, lastRow - 1, 1).getValues(); // column C = Date
+    var rowsToDelete = [];
+    for (var i = 0; i < values.length; i++) {
+      var cell = values[i][0];
+      var cellStr = (cell instanceof Date) ? Utilities.formatDate(cell, tz, "yyyy-MM-dd") : String(cell);
+      if (cellStr === date) rowsToDelete.push(2 + i);
+    }
+    for (var j = rowsToDelete.length - 1; j >= 0; j--) {
+      sh.deleteRow(rowsToDelete[j]); // descending order so earlier indices stay valid
+    }
+  }
+  if (!rows.length) return;
+  var startRow = sh.getLastRow() + 1;
+  sh.getRange(startRow, 1, rows.length, DAILY_PRICES_HEADERS.length).setValues(rows);
+  formatDailyPricesRows(sh, startRow, rows.length);
+}
+// ── Row-count audit for "Daily All Tickers" (stock_summary) ────────────────
+// One-off diagnostic: =COUNTA(C2:C) on this tab read 339405 against an
+// expected 339408 from the clean source parquet (0 duplicate (StockCode,Date)
+// pairs, 0 null Dates/StockCodes, verified independently) -- a 3-row gap that
+// appeared AFTER the getOrResetDailyPricesSheet reset-bug fix above was
+// already confirmed exact (that fix's own backfill re-run posted exactly the
+// predicted 105,476 rows across 22 batches, all HTTP 200). This function
+// re-counts the live sheet's rows per trading date (column C) and compares
+// against EXPECTED_STOCK_SUMMARY_COUNTS -- the per-date row count computed
+// from the clean source -- to find which specific date(s) are short, which is
+// a far narrower place to look for the missing 3 rows than the raw total.
+// Also flags any date value present in column C that ISN'T one of the 354
+// expected trading dates (2025-03-11..2026-09-11), which would point to a
+// stray/garbage value rather than a simple undercount.
+//
+// Run: open this project in the Apps Script editor, select "auditDailyPricesCounts"
+// in the function dropdown, click Run, then View > Logs (or View > Executions)
+// for the output. Read-only -- makes no changes to the sheet.
+var EXPECTED_STOCK_SUMMARY_COUNTS = [
+  ["2025-03-11",957], ["2025-03-12",957], ["2025-03-13",957], ["2025-03-14",957], ["2025-03-17",957], ["2025-03-18",957], ["2025-03-19",957], ["2025-03-20",957], ["2025-03-21",957], ["2025-03-24",957], ["2025-03-25",958], ["2025-03-26",958], ["2025-03-27",958], ["2025-04-08",958], ["2025-04-09",958], ["2025-04-10",958], ["2025-04-11",958], ["2025-04-14",959], ["2025-04-15",960], ["2025-04-16",960], ["2025-04-17",959], ["2025-04-21",959], ["2025-04-22",959], ["2025-04-23",959], ["2025-04-24",959], ["2025-04-25",959], ["2025-04-28",959], ["2025-04-29",959], ["2025-04-30",959], ["2025-05-02",959], ["2025-05-05",959], ["2025-05-06",959], ["2025-05-07",959], ["2025-05-08",960], ["2025-05-09",960], ["2025-05-14",960], ["2025-05-15",960], ["2025-05-16",960], ["2025-05-19",960], ["2025-05-20",960], ["2025-05-21",960], ["2025-05-22",960], ["2025-05-23",960], ["2025-05-26",960], ["2025-05-27",960], ["2025-05-28",960], ["2025-06-02",960], ["2025-06-03",960], ["2025-06-04",960], ["2025-06-05",960], ["2025-06-10",960], ["2025-06-11",960], ["2025-06-12",960], ["2025-06-13",960], ["2025-06-16",960], ["2025-06-17",960], ["2025-06-18",960], ["2025-06-19",960], ["2025-06-20",960], ["2025-06-23",960], ["2025-06-24",960], ["2025-06-25",960], ["2025-06-26",960], ["2025-06-30",960], ["2025-07-01",960], ["2025-07-02",960], ["2025-07-03",960], ["2025-07-04",960], ["2025-07-07",960], ["2025-07-08",962], ["2025-07-09",964], ["2025-07-10",968], ["2025-07-11",968], ["2025-07-14",968], ["2025-07-15",968], ["2025-07-16",968], ["2025-07-17",968], ["2025-07-18",968], ["2025-07-21",956], ["2025-07-22",956], ["2025-07-23",956], ["2025-07-24",956], ["2025-07-25",956], ["2025-07-28",956], ["2025-07-29",956], ["2025-07-30",956], ["2025-07-31",956], ["2025-08-01",956], ["2025-08-04",956], ["2025-08-05",956], ["2025-08-06",956], ["2025-08-07",956], ["2025-08-08",956], ["2025-08-11",956], ["2025-08-12",956], ["2025-08-13",956], ["2025-08-14",956], ["2025-08-15",956], ["2025-08-19",956], ["2025-08-20",956], ["2025-08-21",956], ["2025-08-22",956], ["2025-08-25",956], ["2025-08-26",956], ["2025-08-27",956], ["2025-08-28",956], ["2025-08-29",956], ["2025-09-01",956], ["2025-09-02",956], ["2025-09-03",956], ["2025-09-04",956], ["2025-09-08",956], ["2025-09-09",956], ["2025-09-10",956], ["2025-09-11",956], ["2025-09-12",956], ["2025-09-15",956], ["2025-09-16",956], ["2025-09-17",956], ["2025-09-18",956], ["2025-09-19",956], ["2025-09-22",956], ["2025-09-23",957], ["2025-09-24",957], ["2025-09-25",957], ["2025-09-26",957], ["2025-09-29",957], ["2025-09-30",957], ["2025-10-01",957], ["2025-10-02",956], ["2025-10-03",956], ["2025-10-06",956], ["2025-10-07",956], ["2025-10-08",956], ["2025-10-09",956], ["2025-10-10",956], ["2025-10-13",956], ["2025-10-14",956], ["2025-10-15",956], ["2025-10-16",956], ["2025-10-17",956], ["2025-10-20",956], ["2025-10-21",956], ["2025-10-22",956], ["2025-10-23",956], ["2025-10-24",956], ["2025-10-27",956], ["2025-10-28",956], ["2025-10-29",956], ["2025-10-30",955], ["2025-10-31",955], ["2025-11-03",955], ["2025-11-04",955], ["2025-11-05",955], ["2025-11-06",956], ["2025-11-07",956], ["2025-11-10",956], ["2025-11-11",956], ["2025-11-12",956], ["2025-11-13",956], ["2025-11-14",956], ["2025-11-17",956], ["2025-11-18",956], ["2025-11-19",956], ["2025-11-20",956], ["2025-11-21",956], ["2025-11-24",956], ["2025-11-25",956], ["2025-11-26",956], ["2025-11-27",956], ["2025-11-28",956], ["2025-12-01",956], ["2025-12-02",956], ["2025-12-03",956], ["2025-12-04",956], ["2025-12-05",956], ["2025-12-08",957], ["2025-12-09",957], ["2025-12-10",957], ["2025-12-11",957], ["2025-12-12",957], ["2025-12-15",957], ["2025-12-16",957], ["2025-12-17",958], ["2025-12-18",958], ["2025-12-19",958], ["2025-12-22",958], ["2025-12-23",958], ["2025-12-24",958], ["2025-12-29",958], ["2025-12-30",958], ["2026-01-02",958], ["2026-01-05",958], ["2026-01-06",958], ["2026-01-07",958], ["2026-01-08",958], ["2026-01-09",958], ["2026-01-12",958], ["2026-01-13",958], ["2026-01-14",958], ["2026-01-15",958], ["2026-01-19",958], ["2026-01-20",958], ["2026-01-21",958], ["2026-01-22",958], ["2026-01-23",958], ["2026-01-26",958], ["2026-01-27",958], ["2026-01-28",958], ["2026-01-29",958], ["2026-01-30",958], ["2026-02-02",958], ["2026-02-03",958], ["2026-02-04",958], ["2026-02-05",958], ["2026-02-06",958], ["2026-02-09",958], ["2026-02-10",958], ["2026-02-11",958], ["2026-02-12",958], ["2026-02-13",958], ["2026-02-18",958], ["2026-02-19",958], ["2026-02-20",958], ["2026-02-23",958], ["2026-02-24",958], ["2026-02-25",958], ["2026-02-26",958], ["2026-02-27",958], ["2026-03-02",958], ["2026-03-03",958], ["2026-03-04",958], ["2026-03-05",958], ["2026-03-06",958], ["2026-03-09",958], ["2026-03-10",958], ["2026-03-11",958], ["2026-03-12",958], ["2026-03-13",958], ["2026-03-16",958], ["2026-03-17",958], ["2026-03-25",958], ["2026-03-26",958], ["2026-03-27",958], ["2026-03-30",958], ["2026-03-31",958], ["2026-04-01",958], ["2026-04-02",958], ["2026-04-06",958], ["2026-04-07",958], ["2026-04-08",958], ["2026-04-09",958], ["2026-04-10",959], ["2026-04-13",959], ["2026-04-14",959], ["2026-04-15",959], ["2026-04-16",959], ["2026-04-17",959], ["2026-04-20",959], ["2026-04-21",959], ["2026-04-22",959], ["2026-04-23",959], ["2026-04-24",959], ["2026-04-27",959], ["2026-04-28",959], ["2026-04-29",959], ["2026-04-30",959], ["2026-05-04",959], ["2026-05-05",959], ["2026-05-06",959], ["2026-05-07",959], ["2026-05-08",959], ["2026-05-11",959], ["2026-05-12",959], ["2026-05-13",959], ["2026-05-18",959], ["2026-05-19",959], ["2026-05-20",959], ["2026-05-21",959], ["2026-05-22",959], ["2026-05-25",959], ["2026-05-26",959], ["2026-05-29",959], ["2026-06-02",959], ["2026-06-03",959], ["2026-06-04",959], ["2026-06-05",959], ["2026-06-08",959], ["2026-06-09",959], ["2026-06-10",959], ["2026-06-11",959], ["2026-06-12",959], ["2026-06-15",959], ["2026-06-17",959], ["2026-06-18",959], ["2026-06-19",959], ["2026-06-22",959], ["2026-06-23",959], ["2026-06-24",959], ["2026-06-25",959], ["2026-06-26",959], ["2026-06-29",959], ["2026-06-30",959], ["2026-07-01",959], ["2026-07-02",959], ["2026-07-03",959], ["2026-07-06",959], ["2026-07-07",961], ["2026-07-08",963], ["2026-07-09",964], ["2026-07-10",965], ["2026-07-13",965], ["2026-07-14",965], ["2026-07-15",965], ["2026-07-16",965], ["2026-07-17",965], ["2026-07-20",965], ["2026-07-21",965], ["2026-07-22",965], ["2026-07-23",965], ["2026-07-24",965], ["2026-07-27",965], ["2026-07-28",965], ["2026-07-29",965], ["2026-07-30",963], ["2026-07-31",963], ["2026-08-03",963], ["2026-08-04",963], ["2026-08-05",963], ["2026-08-06",963], ["2026-08-07",963], ["2026-08-10",963], ["2026-08-11",963], ["2026-08-12",963], ["2026-08-13",963], ["2026-08-14",963], ["2026-08-18",963], ["2026-08-19",963], ["2026-08-20",963], ["2026-08-21",963], ["2026-08-24",963], ["2026-08-26",963], ["2026-08-27",963], ["2026-08-28",963], ["2026-08-31",963], ["2026-09-01",963], ["2026-09-02",963], ["2026-09-03",963], ["2026-09-04",963], ["2026-09-07",963], ["2026-09-08",963], ["2026-09-09",963], ["2026-09-10",963], ["2026-09-11",963]
+];
+
+function auditDailyPricesCounts() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(DAILY_PRICES_TAB_NAME);
+  if (!sh) {
+    Logger.log("Sheet '" + DAILY_PRICES_TAB_NAME + "' not found.");
+    return;
+  }
+  var lastRow = sh.getLastRow();
+  if (lastRow < 2) {
+    Logger.log("No data rows found.");
+    return;
+  }
+  // Column C = Date (3rd column -- see DAILY_PRICES_HEADERS / the row shape
+  // appendDailyPricesInit and appendDailyPrices both write).
+  var dateVals = sh.getRange(2, 3, lastRow - 1, 1).getValues();
+  var tz = Session.getScriptTimeZone();
+  var actualCounts = {};
+  for (var i = 0; i < dateVals.length; i++) {
+    var d = dateVals[i][0];
+    var key = (d instanceof Date) ? Utilities.formatDate(d, tz, "yyyy-MM-dd") : String(d).trim();
+    actualCounts[key] = (actualCounts[key] || 0) + 1;
+  }
+
+  var mismatches = [];
+  var expectedTotal = 0;
+  var expectedDatesSeen = {};
+  for (var j = 0; j < EXPECTED_STOCK_SUMMARY_COUNTS.length; j++) {
+    var date = EXPECTED_STOCK_SUMMARY_COUNTS[j][0];
+    var expected = EXPECTED_STOCK_SUMMARY_COUNTS[j][1];
+    expectedDatesSeen[date] = true;
+    expectedTotal += expected;
+    var actual = actualCounts[date] || 0;
+    if (actual !== expected) {
+      mismatches.push([date, expected, actual, actual - expected]);
+    }
+  }
+
+  var unexpectedDates = [];
+  for (var key2 in actualCounts) {
+    if (!expectedDatesSeen[key2]) unexpectedDates.push([key2, actualCounts[key2]]);
+  }
+
+  Logger.log("=== Daily All Tickers row-count audit ===");
+  Logger.log("Total rows in sheet (excl. header): " + dateVals.length);
+  Logger.log("Expected total (source parquet):    " + expectedTotal);
+  Logger.log("Difference: " + (dateVals.length - expectedTotal));
+  Logger.log("");
+  if (mismatches.length === 0) {
+    Logger.log("No per-date mismatches found against the 354 expected trading dates.");
+  } else {
+    Logger.log(mismatches.length + " date(s) with a row-count mismatch:");
+    for (var k = 0; k < mismatches.length; k++) {
+      Logger.log("  " + mismatches[k][0] + ": expected " + mismatches[k][1] +
+        ", actual " + mismatches[k][2] + " (diff " + mismatches[k][3] + ")");
+    }
+  }
+  Logger.log("");
+  if (unexpectedDates.length === 0) {
+    Logger.log("No unexpected date values found in column C.");
+  } else {
+    Logger.log(unexpectedDates.length + " unexpected date value(s) in column C (not among the 354 expected trading dates):");
+    for (var m = 0; m < unexpectedDates.length; m++) {
+      Logger.log("  '" + unexpectedDates[m][0] + "': " + unexpectedDates[m][1] + " row(s)");
+    }
+  }
 }
