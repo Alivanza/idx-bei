@@ -14,6 +14,7 @@ Usage:
 
 import datetime
 import logging
+import os
 import sys
 from typing import Any
 
@@ -91,7 +92,7 @@ def ingest_daily(date=None, client=None, export_parquet=True):
         Summary dict with ingestion results
     """
     if client is None:
-        client = IDXClient()
+        client = IDXClient(base_url=os.environ.get("IDX_BASE_URL", "https://www.idx.co.id/primary"))
     if date is None:
         date = _today_str()
 

@@ -26,6 +26,8 @@ jobs:
 
       - name: Ingest today's data
         working-directory: python
+	env:
+          IDX_BASE_URL: ${{ vars.IDX_BASE_URL }}
         run: |
           $HOME/.local/bin/uv run idx daily
           $HOME/.local/bin/uv run idx corporate
