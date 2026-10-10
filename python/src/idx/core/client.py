@@ -102,6 +102,21 @@ class IDXClient:
                     retries += 1
                 else:
                     log.error("HTTP %d for %s – stopping retries.", status_code, url)
+                    # Same pause as the success path below, applied here too. Without
+                    # it, a caller that fires several requests in a row (e.g. daily.py
+                    # fetching stock/broker/index summaries back-to-back) sends them
+                    # 40-300ms apart on a non-retryable error, since nothing throttled
+                    # the loop. A burst like that looks nothing like normal browsing
+                    # traffic and is a plausible trigger for a WAF rate/frequency rule
+                    # on the origin -- our own manual single-request browser tests,
+                    # always minutes apart, have never once hit this; every automated
+                    # run firing the three datasets in a tight cluster has hit it every
+                    # time. Pausing here won't help if the block is instead keyed off
+                    # Cloudflare's shared Workers egress IP pool rather than request
+                    # cadence (something we can't fully rule out without a dedicated
+                    # egress IP to test from) -- but it directly addresses the one
+                    # structural difference the evidence so far actually points to.
+                    time.sleep(self.delay_seconds)
                     return response
 
             except Exception as exc:
