@@ -25,7 +25,16 @@ jobs:
         run: $HOME/.local/bin/uv sync
 
       - name: Ingest today's data
+        id: ingest
         working-directory: python
+        # Don't let a failed ingest (e.g. IDX/Cloudflare blocking today's attempt) skip
+        # every step after it. daily_screen.py below works fine off whatever the most
+        # recently ingested date already is, and _ingest_dataset() already skips any
+        # date it already has -- so a day that fails here gets picked up automatically
+        # by the next run (tomorrow's cron, or a manual re-run) with no special handling.
+        # The last step below still fails the whole run red when this happens, so a
+        # failed day stays visible instead of going silently green.
+        continue-on-error: true
         env:
           IDX_BASE_URL: ${{ vars.IDX_BASE_URL }}
         run: |
@@ -46,3 +55,9 @@ jobs:
           git add data/
           git diff --cached --quiet && echo "No new data to commit" || git commit -m "Daily data: $(date -u +%F)"
           git push
+
+      - name: Fail the run if today's ingest didn't go through
+        if: steps.ingest.outcome == 'failure'
+        run: |
+          echo "::error::Today's ingest failed (see the 'Ingest today's data' step above for the real error). The screen above still ran and posted/committed against the most recent data that DID ingest successfully -- but today's row is still missing. This run is marked failed on purpose so it doesn't go unnoticed; the gap will be picked up automatically whenever ingestion next succeeds."
+          exit 1
