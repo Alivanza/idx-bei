@@ -5,8 +5,10 @@ IDX HTTP Client with exponential backoff, rate limiting, and browser impersonati
 import asyncio
 import json
 import logging
+import os
 import random
 import time
+from urllib.parse import urlsplit
 
 from curl_cffi import requests
 
@@ -19,12 +21,32 @@ def _backoff_with_jitter(retries, base=2.0, linear=0.5, jitter_frac=0.25):
     return nominal * (1.0 + random.uniform(0, jitter_frac))
 
 
-DEFAULT_BASE_URL = "https://www.idx.co.id/primary"
+def _origin(url):
+    """Returns scheme://host/ for a URL, dropping any path.
+
+    Used to build a same-origin Referer for whatever host we're actually
+    talking to. A Referer pointing at a different domain than the request's
+    own Host (e.g. sending "referer: https://www.idx.co.id/" to a Cloudflare
+    Worker relay at a totally different hostname) is a classic bot/WAF
+    anomaly signal -- it's the kind of cross-origin mismatch a real browser
+    never produces, so a proxy fronted by Cloudflare's own bot protection
+    (as every *.workers.dev subdomain is) can reasonably flag and 403 it,
+    even though the request never reaches our own relay code to explain why.
+    """
+    parts = urlsplit(url)
+    return f"{parts.scheme}://{parts.netloc}/"
+
+
+# Reads IDX_BASE_URL at import time so every IDXClient()/AsyncIDXClient() call
+# that doesn't pass an explicit base_url -- not just the one in daily.py --
+# automatically routes through a configured relay (e.g. a Cloudflare Worker
+# proxy used to route around idx.co.id blocking GitHub Actions' IP range).
+DEFAULT_BASE_URL = os.environ.get("IDX_BASE_URL", "https://www.idx.co.id/primary")
 
 DEFAULT_HEADERS = {
     "accept": "application/json, text/plain, */*",
     "accept-language": "en-US,en;q=0.9",
-    "referer": "https://www.idx.co.id/",
+    "referer": _origin(DEFAULT_BASE_URL),
 }
 
 
