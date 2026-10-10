@@ -980,3 +980,204 @@ function auditDailyPricesCounts() {
     }
   }
 }
+// ── One-time duplicate-row cleanup for "Daily All Tickers" ─────────────────
+// Companion to auditDailyPricesCounts() above. That audit (run via the
+// Audit!H1 QUERY/VLOOKUP sheet, not the Apps Script function -- see below)
+// found the full explanation for the -3 row discrepancy: it isn't 3 missing
+// rows, it's two separate incidents that nearly cancel out --
+//   MISSING entirely (0 rows in the sheet): 2025-09-19, 09-22, 09-23, 09-24,
+//     09-25 (4,783 rows that should be there and aren't)
+//   DUPLICATED (2x expected rows): 2025-10-03, 10-06, 10-07, 10-08, 10-09
+//     (4,780 extra rows from being posted twice)
+// Net: -4,783 + 4,780 = -3, exactly matching the discrepancy. The missing
+// dates are fixed separately by removing them from
+// .backfill_daily_prices_checkpoint and re-running backfill_daily_prices.py
+// (not an Apps Script concern, since the rows just need posting once).
+// THIS function only handles the duplicate side, which does need a script --
+// deleting specific rows isn't something a spreadsheet formula can do.
+//
+// Uses TextFinder (a native Sheets search, not getValues()+a JS loop) so it
+// doesn't repeat auditDailyPricesCounts()'s mistake of pulling the whole
+// 339k-row column into script memory -- that's what hit the 6-minute
+// execution cap last time. TextFinder runs server-side and only returns the
+// handful of matching cells, so this should finish in a few seconds.
+//
+// Run removeDuplicateDates_preview() FIRST (read-only -- logs what it would
+// delete without touching anything). Only after reviewing that output, run
+// removeDuplicateDates_apply() to actually delete. Both use the same safety
+// rule: for a date to be touched at all, the number of matching rows found
+// must be EXACTLY 2x the expected count below -- anything else is left
+// alone and logged for manual review, never guessed at.
+var DUPLICATE_DATES_TO_FIX = {
+  "2025-10-03": 956,
+  "2025-10-06": 956,
+  "2025-10-07": 956,
+  "2025-10-08": 956,
+  "2025-10-09": 956
+};
+
+function removeDuplicateDates_preview() { removeDuplicateDates_(true); }
+function removeDuplicateDates_apply() { removeDuplicateDates_(false); }
+
+function removeDuplicateDates_(dryRun) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(DAILY_PRICES_TAB_NAME);
+  if (!sh) {
+    Logger.log("Sheet '" + DAILY_PRICES_TAB_NAME + "' not found.");
+    return;
+  }
+  var lastRow = sh.getLastRow();
+  var colCRange = sh.getRange(1, 3, lastRow, 1); // whole column C, header included (harmless)
+
+  var allRowsToDelete = [];
+  var dates = Object.keys(DUPLICATE_DATES_TO_FIX);
+  for (var i = 0; i < dates.length; i++) {
+    var date = dates[i];
+    var expected = DUPLICATE_DATES_TO_FIX[date];
+    var tf = colCRange.createTextFinder(date).matchEntireCell(true).useRegularExpression(false);
+    var matches = tf.findAll();
+    var rowNums = matches.map(function (r) { return r.getRow(); }).sort(function (a, b) { return a - b; });
+
+    Logger.log(date + ": found " + rowNums.length + " row(s) (expected " + expected +
+      ", so 2x = " + (2 * expected) + " if truly duplicated).");
+
+    if (rowNums.length !== 2 * expected) {
+      Logger.log("  SKIPPING " + date + " -- count isn't exactly 2x expected. Not touching this date; investigate manually.");
+      continue;
+    }
+
+    // Append-only sheet: the FIRST time a date's batch was posted, it was
+    // written to whatever was then the end of the sheet; any LATER duplicate
+    // repost necessarily lands at a higher row number, no matter what other
+    // dates were interleaved in between. So lowest `expected` row numbers =
+    // the original; the rest = the duplicate(s) to remove.
+    var keep = rowNums.slice(0, expected);
+    var toDelete = rowNums.slice(expected);
+    Logger.log("  Keeping rows " + keep[0] + "-" + keep[keep.length - 1] +
+      ", deleting rows " + toDelete[0] + "-" + toDelete[toDelete.length - 1] +
+      " (" + toDelete.length + " row(s)).");
+    allRowsToDelete = allRowsToDelete.concat(toDelete);
+  }
+
+  Logger.log("");
+  if (allRowsToDelete.length === 0) {
+    Logger.log("Nothing to delete (either no dates matched 2x expected, or all were skipped).");
+    return;
+  }
+
+  Logger.log((dryRun ? "[PREVIEW -- no changes made] " : "[APPLYING] ") +
+    "Total rows to delete: " + allRowsToDelete.length);
+
+  if (dryRun) {
+    Logger.log("This was a preview. Review the counts above, then run removeDuplicateDates_apply() to actually delete.");
+    return;
+  }
+
+  // deleteRow() once per row is what timed out last time: on a 339k-row sheet, every
+  // single-row delete shifts every row below it, so 4,780 individual calls compounds into
+  // a multi-minute operation. Each duplicate block came from one contiguous setValues()
+  // write in the first place, so collapse allRowsToDelete into contiguous runs and issue
+  // one bulk deleteRows(start, count) per run instead -- normally just a handful of calls
+  // total regardless of how many rows they cover.
+  allRowsToDelete.sort(function (a, b) { return a - b; });
+  var runs = [];
+  var runStart = allRowsToDelete[0];
+  var runLen = 1;
+  for (var k = 1; k < allRowsToDelete.length; k++) {
+    if (allRowsToDelete[k] === allRowsToDelete[k - 1] + 1) {
+      runLen++;
+    } else {
+      runs.push([runStart, runLen]);
+      runStart = allRowsToDelete[k];
+      runLen = 1;
+    }
+  }
+  runs.push([runStart, runLen]);
+
+  Logger.log("Grouped into " + runs.length + " contiguous run(s):");
+  for (var m = 0; m < runs.length; m++) {
+    Logger.log("  rows " + runs[m][0] + "-" + (runs[m][0] + runs[m][1] - 1) + " (" + runs[m][1] + " row(s))");
+  }
+
+  // Delete runs in descending start-row order so earlier runs' row numbers stay valid.
+  runs.sort(function (a, b) { return b[0] - a[0]; });
+  for (var j = 0; j < runs.length; j++) {
+    sh.deleteRows(runs[j][0], runs[j][1]);
+  }
+  Logger.log("Deleted " + allRowsToDelete.length + " duplicate row(s) in " + runs.length + " bulk operation(s). New last row: " + sh.getLastRow());
+}
+// ── Cell-usage diagnostic (all tabs) ────────────────────────────────────────
+// Added after the Sep19-25 repost returned HTTP 200 but with an HTML error
+// body: "Exception: This action would increase the number of cells in the
+// workbook beyond the 20,000,000 cell limit." This is Google Sheets' hard,
+// workbook-wide ceiling -- 20,000,000 cells summed across EVERY tab, counted
+// by each sheet's ALLOCATED grid (getMaxRows() x getMaxColumns()), not by how
+// much of it actually has data. A sheet that was ever .clear()'d or had its
+// column count balloon (e.g. the old getLastColumn() instability bug this
+// file's reset-fix addresses above) can stay oversized indefinitely --
+// clearing content doesn't shrink the allocated grid, only deleteRows()/
+// deleteColumns() does that.
+// Run this first to see WHERE the 20M is being spent before trimming anything.
+function reportCellUsage() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheets = ss.getSheets();
+  var total = 0;
+  Logger.log("=== Cell usage across all tabs (counts toward Sheets' 20,000,000 limit) ===");
+  for (var i = 0; i < sheets.length; i++) {
+    var sh = sheets[i];
+    var maxRows = sh.getMaxRows();
+    var maxCols = sh.getMaxColumns();
+    var allocated = maxRows * maxCols;
+    var usedRows = sh.getLastRow();
+    var usedCols = sh.getLastColumn();
+    total += allocated;
+    Logger.log(sh.getName() + ": allocated " + maxRows + " x " + maxCols + " = " +
+      allocated.toLocaleString() + " cells  |  actually used: " + usedRows + " x " + usedCols +
+      " = " + (usedRows * usedCols).toLocaleString() + " cells" +
+      (allocated > usedRows * usedCols * 2 ? "   <-- allocated is more than 2x what's used" : ""));
+  }
+  Logger.log("");
+  Logger.log("TOTAL allocated: " + total.toLocaleString() + " / 20,000,000 (" +
+    (100 * total / 20000000).toFixed(1) + "%)");
+}
+// ── Free up the 20M-cell ceiling: trim "Daily All Tickers"'s phantom columns ─
+// reportCellUsage() above found the whole problem in one place: this tab is
+// allocated 57 columns but only uses 10 -- 47 x 335,477 rows = 15,767,419
+// wasted cells, 97.9% of the workbook's entire 19,537,698-cell total (20M
+// limit). Clearing/resetting a sheet's CONTENT (what getOrResetDailyPricesSheet
+// above does) never shrinks its ALLOCATED grid -- only deleteColumns()/
+// deleteRows() do that, which is presumably how this tab ended up this wide in
+// the first place (likely from whatever the sheet's size was before the
+// historical-data backfill started writing into it).
+// Computes the column count to keep from the sheet's OWN current
+// getLastColumn() rather than hardcoding DAILY_PRICES_HEADERS.length, so this
+// is correct even if they've ever drifted apart.
+function trimDailyAllTickersColumns() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(DAILY_PRICES_TAB_NAME);
+  if (!sh) {
+    Logger.log("Sheet '" + DAILY_PRICES_TAB_NAME + "' not found.");
+    return;
+  }
+  var maxCols = sh.getMaxColumns();
+  var usedCols = sh.getLastColumn();
+  var maxRows = sh.getMaxRows();
+
+  Logger.log(DAILY_PRICES_TAB_NAME + ": currently allocated " + maxCols + " column(s), " +
+    usedCols + " actually used.");
+
+  if (maxCols <= usedCols) {
+    Logger.log("Nothing to trim -- already at its used width.");
+    return;
+  }
+
+  var toDelete = maxCols - usedCols;
+  var freed = toDelete * maxRows;
+  Logger.log("Deleting columns " + (usedCols + 1) + "-" + maxCols + " (" + toDelete +
+    " column(s)) -- frees ~" + freed.toLocaleString() + " cells.");
+
+  sh.deleteColumns(usedCols + 1, toDelete);
+
+  Logger.log("Done. New allocated width: " + sh.getMaxColumns() + " column(s).");
+  Logger.log("Re-run reportCellUsage() to see the new workbook-wide total.");
+}
