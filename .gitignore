@@ -73,4 +73,5 @@ CLAUDE.md
 python/config.json
 
 # Stray download folder, not part of the project
-Claude outputs/
+Claude outputs/backtest_kit/
+prices_kit/
