@@ -370,6 +370,49 @@ def post_payload(cfg, payload):
         return resp.status, resp.read().decode("utf-8")
 
 
+def to_daily_prices_rows(df, date):
+    """Builds [Ticker, Name, Date, Open, High, Low, Close, Volume] rows for one date --
+    the same row shape DAILY_PRICES_HEADERS (AppsScript_Code.gs) and backfill_daily_prices.py
+    already use for "Daily All Tickers". `df` is the raw stock_summary.parquet frame (not
+    run_screen()'s enriched version), `date` a 'YYYY-MM-DD' string."""
+    sub = df[df["Date"] == pd.Timestamp(date)].sort_values("StockCode")
+    out = []
+    for r in sub.itertuples(index=False):
+        out.append([
+            r.StockCode,
+            r.StockName,
+            pd.Timestamp(r.Date).date().isoformat(),
+            None if pd.isna(r.OpenPrice) else float(r.OpenPrice),
+            None if pd.isna(r.High) else float(r.High),
+            None if pd.isna(r.Low) else float(r.Low),
+            None if pd.isna(r.Close) else float(r.Close),
+            None if pd.isna(r.Volume) else float(r.Volume),
+        ])
+    return out
+
+
+def post_daily_prices(cfg, date):
+    """POSTs one trading day's full-universe OHLCV to "Daily All Tickers" (mode=
+    "prices_daily"). AppsScript_Code.gs's appendDailyPrices() has supported this since it
+    was written -- comment there says "one call per trading day from daily_screen.py" -- but
+    nothing in this pipeline actually called it until now, which is why that tab only ever
+    had the one-time backfill_daily_prices.py load and then fell behind again immediately.
+    Separate POST from the main screen payload; Apps Script dedupes by date server-side
+    (deletes that date's existing rows before re-inserting), so safe to retry or re-run."""
+    ss_path = os.path.join(PARQUET_DIR, "stock_summary.parquet")
+    df = pd.read_parquet(ss_path)
+    rows = to_daily_prices_rows(df, date)
+    if not rows:
+        print(f"post_daily_prices: no rows for {date} in stock_summary.parquet, skipping.")
+        return
+    body = {"secret": cfg.get("shared_secret", ""), "mode": "prices_daily", "rows": rows, "date": date}
+    data = json.dumps(body).encode("utf-8")
+    req = urllib.request.Request(cfg["webapp_url"], data=data, headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        status, text = resp.status, resp.read().decode("utf-8")
+    print(f"post_daily_prices ({date}): HTTP {status} {text.strip()}")
+
+
 def main():
     cfg = load_config()
     payload = build_payload(cfg)
@@ -383,6 +426,14 @@ def main():
     except Exception as e:
         print("Error posting to sheet:", repr(e))
         sys.exit(1)
+
+    # Keep "Daily All Tickers" current going forward. Non-fatal on its own: the main screen
+    # payload above already posted successfully by this point, so a problem here (e.g. a
+    # transient Apps Script timeout) shouldn't turn an otherwise-successful run red.
+    try:
+        post_daily_prices(cfg, payload["last_trading_date"])
+    except Exception as e:
+        print("Error posting daily prices to Daily All Tickers (non-fatal):", repr(e))
 
 
 if __name__ == "__main__":
