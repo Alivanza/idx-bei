@@ -1,0 +1,7 @@
+Source,HorizonTradingDays,N_ValidRows,HitRatePct,MeanReturnPct,MedianReturnPct,MeanBenchmarkReturnPct_JKSE,MeanExcessReturnPct
+Backfill,5,5251,46.6,1.974,0.0,0.013,1.961
+Backfill,10,5168,48.0,3.463,0.0,0.003,3.46
+Backfill,20,5049,47.4,6.011,-0.649,-0.281,6.292
+Live,5,15,53.3,-1.667,0.51,-1.532,-0.135
+Live,10,15,40.0,-1.088,-3.483,-4.578,3.49
+Live,20,15,53.3,11.07,6.122,-6.843,17.913

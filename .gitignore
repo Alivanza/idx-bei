@@ -75,3 +75,9 @@ python/config.json
 # Stray download folder, not part of the project
 Claude outputs/backtest_kit/
 prices_kit/
+
+# Backtest kit: scripts, README, tickers list and summary are tracked;
+# bulky or regenerable data files are not.
+backtest_kit/idx_price_history.csv
+backtest_kit/backtest_row_detail.csv
+backtest_kit/screen_log_export.csv

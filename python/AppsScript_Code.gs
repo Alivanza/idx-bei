@@ -199,6 +199,18 @@ function borderRange(range) {
   range.setBorder(true, true, true, true, true, true, BORDER_COLOR, SpreadsheetApp.BorderStyle.SOLID);
 }
 
+// Forces a column to Plain Text ("@") BEFORE values are written into it. Must run before
+// setValues(), not after: Sheets decides whether a string like "TRUE" is text or a boolean
+// at WRITE time, from the target cell's format. Applying "@" afterwards (as the
+// format*Rows() helpers below do for dates/numbers) is too late -- the cell has already
+// been coerced. Root cause of the Triniti Dinamik Tbk. bug: its real IDX ticker is the
+// literal string "TRUE", which Sheets stored as the boolean TRUE in every tab that wrote
+// r.Ticker through a General-format cell (Screen_Log had 14 such rows as of 2026-10-10).
+function forceTextColumn(sh, startRow, numRows, col) {
+  if (numRows <= 0) return;
+  sh.getRange(startRow, col, numRows, 1).setNumberFormat("@");
+}
+
 // Column formats for the Top-8-style header layout:
 // RunDate, LastTradingDate, Ticker, Name, Sector, LastPrice, LotCost, ADTV20,
 // ATR14_pct, High20, DistToHigh20, ATRsBelowHigh, BreakoutLast3
@@ -265,6 +277,7 @@ function writeLatestTop8(ss, body) {
             r.ADTV20, r.ATR14_pct, r.High20, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.Source || "Live"];
   });
   if (rows.length) {
+    forceTextColumn(sh, 2, rows.length, 3); // Ticker -- see forceTextColumn()
     sh.getRange(2, 1, rows.length, TOP_HEADERS.length).setValues(rows);
     formatTop8Rows(sh, 2, rows.length);
   }
@@ -286,9 +299,7 @@ function removeExistingLogRows(sh, lastTradingDate) {
     var cellStr = (cell instanceof Date) ? Utilities.formatDate(cell, tz, "yyyy-MM-dd") : String(cell);
     if (cellStr === lastTradingDate) rowsToDelete.push(2 + i);
   }
-  for (var j = rowsToDelete.length - 1; j >= 0; j--) {
-    sh.deleteRow(rowsToDelete[j]);
-  }
+  deleteRowsBulk(sh, rowsToDelete);
 }
 
 function appendToLog(ss, body) {
@@ -308,6 +319,7 @@ function appendToLog(ss, body) {
   });
   if (rows.length) {
     var startRow = sh.getLastRow() + 1;
+    forceTextColumn(sh, startRow, rows.length, 3); // Ticker -- see forceTextColumn()
     sh.getRange(startRow, 1, rows.length, SCREENLOG_HEADERS.length).setValues(rows);
     formatScreenLogRows(sh, startRow, rows.length);
   }
@@ -348,9 +360,7 @@ function appendToLogBulk(ss, runs) {
       var cellStr = (cell instanceof Date) ? Utilities.formatDate(cell, tz, "yyyy-MM-dd") : String(cell);
       if (batchDates[cellStr]) rowsToDelete.push(2 + i);
     }
-    for (var j = rowsToDelete.length - 1; j >= 0; j--) {
-      sh.deleteRow(rowsToDelete[j]); // descending order so earlier indices stay valid
-    }
+    deleteRowsBulk(sh, rowsToDelete);
   }
 
   var allRows = [];
@@ -362,6 +372,7 @@ function appendToLogBulk(ss, runs) {
   });
   if (allRows.length) {
     var startRow = sh.getLastRow() + 1;
+    forceTextColumn(sh, startRow, allRows.length, 3); // Ticker -- see forceTextColumn()
     sh.getRange(startRow, 1, allRows.length, SCREENLOG_HEADERS.length).setValues(allRows);
     formatScreenLogRows(sh, startRow, allRows.length);
   }
@@ -381,6 +392,7 @@ function writeAllPassers(ss, body) {
             r.ADTV20, r.ATR14_pct, r.High20, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.IncludedInShortlist];
   });
   if (rows.length) {
+    forceTextColumn(sh, 2, rows.length, 3); // Ticker -- see forceTextColumn()
     sh.getRange(2, 1, rows.length, ALLPASSERS_HEADERS.length).setValues(rows);
     sh.getRange(2, 1, rows.length, 1).setNumberFormat("yyyy-mm-dd");   // RunDate
     sh.getRange(2, 2, rows.length, 1).setNumberFormat("yyyy-mm-dd");   // LastTradingDate
@@ -426,6 +438,7 @@ function writeAllTickers(ss, body) {
             r.F5_NoPendingCA, r.PassesAll, r.IncludedInShortlist];
   });
   if (rows.length) {
+    forceTextColumn(sh, 2, rows.length, 3); // Ticker -- see forceTextColumn()
     sh.getRange(2, 1, rows.length, ALLTICKERS_HEADERS.length).setValues(rows);
     sh.getRange(2, 1, rows.length, 1).setNumberFormat("yyyy-mm-dd");   // RunDate
     sh.getRange(2, 2, rows.length, 1).setNumberFormat("yyyy-mm-dd");   // LastTradingDate
@@ -475,6 +488,7 @@ function writeNearMisses(ss, body) {
     return [body.run_date, r.Ticker, r.Name, r.ADTV20, (r.FailedFilters || []).join(", ")];
   });
   if (rows.length) {
+    forceTextColumn(sh, 2, rows.length, 2); // Ticker (col 2 here) -- see forceTextColumn()
     sh.getRange(2, 1, rows.length, NEARMISS_HEADERS.length).setValues(rows);
     sh.getRange(2, 1, rows.length, 1).setNumberFormat("yyyy-mm-dd"); // RunDate
     sh.getRange(2, 4, rows.length, 1).setNumberFormat("#,##0");      // ADTV20
@@ -836,6 +850,34 @@ function getOrResetDailyPricesSheet(ss) {
   return sh;
 }
 
+// Deletes the given 1-based sheet rows using one deleteRows(start, count) call per contiguous
+// run, instead of one deleteRow() per row. Each row-level delete shifts every row below it,
+// so hundreds of single-row deletes on a 300k+ row sheet run into the execution time limit;
+// a date's block was written contiguously, so it is normally one run -> one call.
+// rowNumbers: array of 1-based row numbers, any order, no duplicates.
+function deleteRowsBulk(sh, rowNumbers) {
+  if (!rowNumbers || !rowNumbers.length) return;
+  var rows = rowNumbers.slice().sort(function (a, b) { return a - b; });
+  var runs = [];
+  var runStart = rows[0];
+  var runLen = 1;
+  for (var i = 1; i < rows.length; i++) {
+    if (rows[i] === rows[i - 1] + 1) {
+      runLen++;
+    } else {
+      runs.push([runStart, runLen]);
+      runStart = rows[i];
+      runLen = 1;
+    }
+  }
+  runs.push([runStart, runLen]);
+  // Descending start row so earlier runs' row numbers stay valid.
+  runs.sort(function (a, b) { return b[0] - a[0]; });
+  for (var j = 0; j < runs.length; j++) {
+    sh.deleteRows(runs[j][0], runs[j][1]);
+  }
+}
+
 function formatDailyPricesRows(sh, startRow, numRows) {
   if (numRows <= 0) return;
   sh.getRange(startRow, 3, numRows, 1).setNumberFormat("yyyy-mm-dd"); // Date
@@ -860,6 +902,7 @@ function appendDailyPricesInit(ss, rows) {
   var sh = getOrResetDailyPricesSheet(ss);
   if (!rows.length) return;
   var startRow = sh.getLastRow() + 1;
+  forceTextColumn(sh, startRow, rows.length, 1); // Ticker (col 1 here) -- see forceTextColumn()
   sh.getRange(startRow, 1, rows.length, DAILY_PRICES_HEADERS.length).setValues(rows);
   formatDailyPricesRows(sh, startRow, rows.length);
 }
@@ -883,12 +926,14 @@ function appendDailyPrices(ss, rows, date) {
       var cellStr = (cell instanceof Date) ? Utilities.formatDate(cell, tz, "yyyy-MM-dd") : String(cell);
       if (cellStr === date) rowsToDelete.push(2 + i);
     }
-    for (var j = rowsToDelete.length - 1; j >= 0; j--) {
-      sh.deleteRow(rowsToDelete[j]); // descending order so earlier indices stay valid
-    }
+    // Bulk delete, NOT one deleteRow() per row. On 16/10/2026 the per-row loop (963 calls
+    // for one date on a 358k-row sheet) hit the Apps Script time limit part-way, leaving
+    // 2026-10-09 with 758 of 963 rows and no re-insert. See deleteRowsBulk().
+    deleteRowsBulk(sh, rowsToDelete);
   }
   if (!rows.length) return;
   var startRow = sh.getLastRow() + 1;
+  forceTextColumn(sh, startRow, rows.length, 1); // Ticker (col 1 here) -- see forceTextColumn()
   sh.getRange(startRow, 1, rows.length, DAILY_PRICES_HEADERS.length).setValues(rows);
   formatDailyPricesRows(sh, startRow, rows.length);
 }
