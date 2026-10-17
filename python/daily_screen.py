@@ -408,7 +408,9 @@ def post_daily_prices(cfg, date):
     body = {"secret": cfg.get("shared_secret", ""), "mode": "prices_daily", "rows": rows, "date": date}
     data = json.dumps(body).encode("utf-8")
     req = urllib.request.Request(cfg["webapp_url"], data=data, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=60) as resp:
+    # 180 s (was 60): the Apps Script delete+append on the ~363k-row sheet exceeded 60 s on
+    # 17/10/2026, so the client gave up ("read operation timed out") while the sheet stayed correct.
+    with urllib.request.urlopen(req, timeout=180) as resp:
         status, text = resp.status, resp.read().decode("utf-8")
     print(f"post_daily_prices ({date}): HTTP {status} {text.strip()}")
 

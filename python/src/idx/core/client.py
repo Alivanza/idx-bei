@@ -101,12 +101,17 @@ class IDXClient:
                     time.sleep(backoff)
                     retries += 1
                 else:
+                    # x-diag-* headers are added by the idx-proxy Worker on upstream errors.
+                    diag = {
+                        k: v for k, v in response.headers.items() if k.lower().startswith("x-diag-")
+                    }
                     log.error(
-                        "HTTP %d for %s – stopping retries. server=%s body=%r",
+                        "HTTP %d for %s – stopping retries. server=%s body=%r diag=%s",
                         status_code,
                         url,
                         response.headers.get("server"),
                         response.text[:200],
+                        diag,
                     )
                     # Same pause as the success path below, applied here too. Without
                     # it, a caller that fires several requests in a row (e.g. daily.py
