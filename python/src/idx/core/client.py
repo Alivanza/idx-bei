@@ -101,7 +101,13 @@ class IDXClient:
                     time.sleep(backoff)
                     retries += 1
                 else:
-                    log.error("HTTP %d for %s – stopping retries.", status_code, url)
+                    log.error(
+                        "HTTP %d for %s – stopping retries. server=%s body=%r",
+                        status_code,
+                        url,
+                        response.headers.get("server"),
+                        response.text[:200],
+                    )
                     # Same pause as the success path below, applied here too. Without
                     # it, a caller that fires several requests in a row (e.g. daily.py
                     # fetching stock/broker/index summaries back-to-back) sends them
