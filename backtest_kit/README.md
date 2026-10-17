@@ -1,84 +1,78 @@
 # IDX Shortlist Backtest Kit
 
-Answers: does the daily shortlist's LastPrice actually go up more than the
-market over the following 5/10/20 trading days?
+Answers: does the daily shortlist's LastPrice rise more than the market (^JKSE)
+over the following 5 / 10 / 20 trading days?
 
-## Why this exists as a local kit instead of running in the sandbox
+Last full run: 16/10/2026. Results and sensitivities live in the Google Sheet
+tab `Backtest_Results`; this folder holds the code and inputs needed to rebuild
+every number in it.
 
-Two things were checked and ruled out before landing here, both worth
-knowing since they explain the design of what follows:
+## Why the fetch runs on your PC, not in Claude's sandbox
 
-1. **yfinance from the analysis sandbox is blocked.** The sandbox's own
-   network policy rejects every call to Yahoo Finance's servers
-   (`connect_rejected` on `query2.finance.yahoo.com` etc. -- confirmed by
-   testing, not assumed). It only allows a short list of package registries
-   and Anthropic's own API. Your machine has normal internet access, so
-   step 1 below runs there.
-2. **Pulling this via GOOGLEFINANCE formulas inside the Sheet is unreliable
-   at this scale.** Your own workbook already has a "Daily All Tickers" tab
-   attempting something similar for ~250 tickers, and most cells are blank
-   (checked directly: ASII, ADRO, ANTM, AALI all show zero populated days
-   out of 51). That's real evidence a script-driven mass GOOGLEFINANCE
-   write throttles around this size, not a theoretical concern.
+The cloud sandbox blocks Yahoo Finance (`connect_rejected` on every Yahoo
+host), so step 1 below must run on a machine with normal internet access.
+GOOGLEFINANCE formulas inside the Sheet were also ruled out: at this scale a
+script-driven mass write throttles and most cells come back blank.
 
-## What's in this folder
+## Files
 
-- `screen_log_export.csv` -- every Screen_Log row from the live sheet
-  (4,982 rows; 10 rows with a corrupted Ticker value were excluded -- see
-  "Bug found along the way" below), already exported so you don't need to
-  do anything with the Sheet itself.
-- `tickers_needed.csv` -- the 369 unique tickers that ever appeared in
-  Screen_Log, each with the earliest/latest date it was needed, plus one
-  extra row for `^JKSE` (Jakarta Composite Index) used as the market
-  benchmark. Documentation of *why*, not something you need to edit.
-- `fetch_idx_prices.py` -- run this first. Downloads daily closes from
-  Yahoo Finance for all 370 symbols.
-- `compute_backtest.py` -- run this second. Computes forward returns and
-  the hit-rate/mean/median summary.
+Tracked in git:
 
-## Steps
+- `fetch_idx_prices.py` -- downloads daily Open / High / Low / Close / Volume
+  (unadjusted, Yahoo `.JK` suffix) for every ticker in `tickers_needed.csv`,
+  plus `^JKSE` as the benchmark. Close stays in column 3 so
+  `compute_backtest.py` is unaffected by the extra columns.
+- `compute_backtest.py` -- forward returns, hit rate, mean / median, excess
+  versus ^JKSE. Standard library only. Formula, worked example and assumptions
+  are in its docstring: read that before trusting any number.
+- `tickers_needed.csv` -- every ticker that ever appeared in Screen_Log
+  (373 incl. `TRUE` = Triniti Dinamik) plus `^JKSE`, with earliest / latest
+  screen date. Documentation of why the fetch window was chosen.
+- `fetch_coverage.csv` -- per-ticker fetch status (OK / NO_DATA / ERROR).
+  Check it after every fetch.
+- `backtest_summary.csv` -- per Source and horizon: N, hit rate, mean, median,
+  mean benchmark, mean excess.
 
-1. `pip install yfinance --upgrade` (skip if already installed)
-2. `python fetch_idx_prices.py`
-   Expect several minutes (369 tickers, one request each, a 0.6s pause
-   between requests to stay polite to Yahoo). It prints progress per
-   ticker and will not stop on an individual failure -- a ticker with no
-   Yahoo coverage is recorded as `NO_DATA` and everything else continues.
-   Produces `idx_price_history.csv` and `fetch_coverage.csv`.
-3. **Check `fetch_coverage.csv` before trusting the results** -- open it
-   and look at the `Status` column. `NO_DATA` or `ERROR` rows are tickers
-   the backtest will have no forward return for at all; this is expected
-   to some degree for small/illiquid or newly-listed IDX names (Yahoo's
-   IDX coverage is known to be inconsistent for these), not a bug in the
-   script. Worth a glance at how many rows are affected before drawing
-   conclusions from the summary.
-4. `python compute_backtest.py`
-   Produces `backtest_row_detail.csv` (every row × every horizon, so you
-   can audit or rebuild any single number) and `backtest_summary.csv`
-   (the hit-rate/mean/median rollup, separately for Live and Backfill
-   rows, per horizon).
-5. Send back all four output files (`fetch_coverage.csv`,
-   `idx_price_history.csv`, `backtest_row_detail.csv`,
-   `backtest_summary.csv`) and the results get written up with the
-   assumptions/sensitivities that matter, and optionally into a new
-   `Backtest_Results` tab in the Sheet.
+Git-ignored (large or regenerable; see `.gitignore`):
 
-The exact forward-return formula, a worked example, and every assumption
-behind it (price source, no corporate-action adjustment, why Backfill vs.
-Live are reported separately, why ^JKSE rather than "average of the
-shortlist tickers" is the benchmark) are documented in the docstring at the
-top of `compute_backtest.py` -- read that before trusting any number it
-prints.
+- `screen_log_export.csv` -- Screen_Log exported from the Sheet
+  (RunDate, LastTradingDate, Ticker, Name, Sector, LastPrice, Source).
+  5,267 rows on the last run: 5,252 Backfill + 15 Live.
+- `idx_price_history.csv` -- output of the fetch (~7 MB).
+- `backtest_row_detail.csv` -- one row per Screen_Log row per horizon, so any
+  single number can be audited.
 
-## Bug found along the way (separate from this backtest, flagged for you)
+## Steps (from this folder, PowerShell, plain `python`)
 
-10 Screen_Log rows for **Triniti Dinamik Tbk.** have their `Ticker` column
-stored as the literal boolean `TRUE` instead of a ticker string -- almost
-certainly because the real ticker for this company is the four-letter code
-that Google Sheets auto-converts to a boolean when written as a bare string
-(the same class of bug as writing `=TRUE` instead of `'TRUE`). Those 10 rows
-were excluded from this backtest (can't join to a price series without a
-real ticker) and are otherwise sitting in Screen_Log with a broken Ticker
-field. Let me know if you want this fixed at the source (forcing the Ticker
-column to text format in the Apps Script write, same pattern already used
-elsewhere in the workbook).
+    cd C:\Users\alrhu\OneDrive\Documents\idx-bei\backtest_kit
+    pip install yfinance --upgrade     # skip if already installed
+    python fetch_idx_prices.py         # ~4 minutes for ~375 symbols
+    python compute_backtest.py
+
+1. Re-export Screen_Log to `screen_log_export.csv` first if the Sheet has new
+   rows since the last run.
+2. Open `fetch_coverage.csv` and look at Status. NO_DATA or ERROR tickers get
+   no forward return.
+3. `compute_backtest.py` needs no packages beyond the standard library.
+4. Known quirk: rows with NO_PRICE_DATA / ENTRY_DATE_NOT_FOUND are written
+   with fewer columns than priced rows. Parse the detail file with
+   `csv.reader` (Reason is the last column), not `csv.DictReader`.
+
+## Assumptions that matter most (full list in the compute docstring)
+
+- Backfill rows (2025-04-16 onward) are the only sample large enough to read;
+  Live is one date and is reported separately. Backfill may carry hindsight
+  bias if ADTV20 / High20 / ATR14_pct were not computed point-in-time -- not
+  verified.
+- Unadjusted closes, no split or rights adjustment. Rows where the Yahoo entry
+  price differs from the sheet LastPrice by more than 1% are flagged in
+  `EntryPriceDiffPct_vs_Sheet`, not removed (85 of 5,267 on the last run).
+- Fills assumed at the stated price with no costs, slippage or liquidity
+  limit. Entry at the screen-day close (the headline) is not executable if the
+  screen runs after the close; Open(D+1) is the first executable price.
+
+## History
+
+- The `TRUE` ticker bug (Triniti Dinamik's code read as boolean TRUE by Google
+  Sheets) was fixed at the source in `python/AppsScript_Code.gs`
+  (`forceTextColumn` before `setValues`). `TRUE.JK` is now fetched and priced.
