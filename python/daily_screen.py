@@ -366,7 +366,9 @@ def build_payload(cfg, as_of_date=None, run_date=None, source="Live"):
 def post_payload(cfg, payload):
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(cfg["webapp_url"], data=data, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=30) as resp:
+    # 120 s (was 30): the Apps Script post timed out client-side on 17/10/2026 while the sheet
+    # stayed consistent, so the script exited 1 despite the data landing.
+    with urllib.request.urlopen(req, timeout=120) as resp:
         return resp.status, resp.read().decode("utf-8")
 
 
