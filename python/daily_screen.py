@@ -410,9 +410,10 @@ def post_daily_prices(cfg, date):
     body = {"secret": cfg.get("shared_secret", ""), "mode": "prices_daily", "rows": rows, "date": date}
     data = json.dumps(body).encode("utf-8")
     req = urllib.request.Request(cfg["webapp_url"], data=data, headers={"Content-Type": "application/json"})
-    # 180 s (was 60): the Apps Script delete+append on the ~363k-row sheet exceeded 60 s on
-    # 17/10/2026, so the client gave up ("read operation timed out") while the sheet stayed correct.
-    with urllib.request.urlopen(req, timeout=180) as resp:
+    # 330 s (was 180, originally 60): the Apps Script delete+append on the ~364k-row sheet took longer
+    # than 180 s on 20/10/2026, so the client gave up ("read operation timed out") while the sheet
+    # stayed correct. 330 s sits just under Apps Script's 6-minute execution cap.
+    with urllib.request.urlopen(req, timeout=330) as resp:
         status, text = resp.status, resp.read().decode("utf-8")
     print(f"post_daily_prices ({date}): HTTP {status} {text.strip()}")
 
