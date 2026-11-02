@@ -1,9 +1,17 @@
 {
-  "totalRecordsAllTypes": 1602,
+  "totalRecordsAllTypes": 1601,
   "categories": {
     "tanpaHmetd": {
-      "count": 77,
+      "count": 78,
       "data": [
+        {
+          "id": 83429,
+          "KodeEmiten": "VISI",
+          "TanggalPencatatan": "2026-10-29T00:00:00",
+          "JenisTindakan": "Tanpa HMETD",
+          "JumlahSaham": 120724400.0,
+          "JumlahSahamSetelahTindakan": 3195724400.0
+        },
         {
           "id": 83358,
           "KodeEmiten": "APEX",
@@ -626,36 +634,36 @@
       "count": 243,
       "data": [
         {
-          "id": 83407,
+          "id": 83441,
           "KodeEmiten": "BUVA",
-          "TanggalPencatatan": "2026-10-27T00:00:00",
+          "TanggalPencatatan": "2026-11-02T00:00:00",
           "JenisTindakan": "HMETD",
-          "JumlahSaham": 88507703.0,
-          "JumlahSahamSetelahTindakan": 28981523325.0
+          "JumlahSaham": 83066103.0,
+          "JumlahSahamSetelahTindakan": 30077666152.0
         },
         {
-          "id": 83411,
+          "id": 83431,
           "KodeEmiten": "VKTR",
-          "TanggalPencatatan": "2026-10-27T00:00:00",
+          "TanggalPencatatan": "2026-10-29T00:00:00",
           "JenisTindakan": "HMETD",
-          "JumlahSaham": 2974549952.0,
-          "JumlahSahamSetelahTindakan": 57294711337.0
+          "JumlahSaham": 1455288663.0,
+          "JumlahSahamSetelahTindakan": 58750000000.0
         },
         {
-          "id": 83378,
-          "KodeEmiten": "ENRG",
-          "TanggalPencatatan": "2026-10-23T00:00:00",
-          "JenisTindakan": "HMETD",
-          "JumlahSaham": 2068318241.0,
-          "JumlahSahamSetelahTindakan": 39284251006.0
-        },
-        {
-          "id": 83387,
+          "id": 83413,
           "KodeEmiten": "BRNA",
-          "TanggalPencatatan": "2026-10-22T00:00:00",
+          "TanggalPencatatan": "2026-10-28T00:00:00",
           "JenisTindakan": "HMETD",
-          "JumlahSaham": 3315.0,
-          "JumlahSahamSetelahTindakan": 1322263868.0
+          "JumlahSaham": 43067765.0,
+          "JumlahSahamSetelahTindakan": 1365340107.0
+        },
+        {
+          "id": 83417,
+          "KodeEmiten": "ENRG",
+          "TanggalPencatatan": "2026-10-28T00:00:00",
+          "JenisTindakan": "HMETD",
+          "JumlahSaham": 562564619.0,
+          "JumlahSahamSetelahTindakan": 39846815625.0
         },
         {
           "id": 83376,
@@ -5417,7 +5425,7 @@
       ]
     },
     "ipo": {
-      "count": 432,
+      "count": 431,
       "data": [
         {
           "id": 82532,
@@ -5751,14 +5759,6 @@
           "id": 21456,
           "KodeEmiten": "AREA",
           "TanggalPencatatan": "2024-04-01T00:00:00",
-          "JenisTindakan": "IPO",
-          "JumlahSaham": 0.0,
-          "JumlahSahamSetelahTindakan": 0.0
-        },
-        {
-          "id": 20912,
-          "KodeEmiten": "VISI",
-          "TanggalPencatatan": "2024-02-27T00:00:00",
           "JenisTindakan": "IPO",
           "JumlahSaham": 0.0,
           "JumlahSahamSetelahTindakan": 0.0
@@ -8878,71 +8878,63 @@
       ]
     },
     "waran": {
-      "count": 232,
+      "count": 231,
       "data": [
         {
-          "id": 83404,
-          "KodeEmiten": "CYBR",
-          "TanggalPencatatan": "2026-10-27T00:00:00",
-          "JenisTindakan": "Waran",
-          "JumlahSaham": 1000.0,
-          "JumlahSahamSetelahTindakan": 13488401954.0
-        },
-        {
-          "id": 83405,
-          "KodeEmiten": "ISAP",
-          "TanggalPencatatan": "2026-10-27T00:00:00",
-          "JenisTindakan": "Waran",
-          "JumlahSaham": 178.0,
-          "JumlahSahamSetelahTindakan": 4020382866.0
-        },
-        {
-          "id": 83408,
-          "KodeEmiten": "INET",
-          "TanggalPencatatan": "2026-10-27T00:00:00",
-          "JenisTindakan": "Waran",
-          "JumlahSaham": 1689.0,
-          "JumlahSahamSetelahTindakan": 22378483489.0
-        },
-        {
-          "id": 83409,
-          "KodeEmiten": "PJHB",
-          "TanggalPencatatan": "2026-10-27T00:00:00",
-          "JenisTindakan": "Waran",
-          "JumlahSaham": 2760.0,
-          "JumlahSahamSetelahTindakan": 1921251795.0
-        },
-        {
-          "id": 83412,
-          "KodeEmiten": "PYFA",
-          "TanggalPencatatan": "2026-10-27T00:00:00",
-          "JenisTindakan": "Waran",
-          "JumlahSaham": 123.0,
-          "JumlahSahamSetelahTindakan": 11236751907.0
-        },
-        {
-          "id": 83397,
+          "id": 83439,
           "KodeEmiten": "MANG",
-          "TanggalPencatatan": "2026-10-26T00:00:00",
+          "TanggalPencatatan": "2026-11-02T00:00:00",
           "JenisTindakan": "Waran",
-          "JumlahSaham": 51.0,
-          "JumlahSahamSetelahTindakan": 3812607680.0
+          "JumlahSaham": 1.0,
+          "JumlahSahamSetelahTindakan": 3812608682.0
         },
         {
-          "id": 83375,
-          "KodeEmiten": "CSIS",
-          "TanggalPencatatan": "2026-10-22T00:00:00",
+          "id": 83442,
+          "KodeEmiten": "INET",
+          "TanggalPencatatan": "2026-11-02T00:00:00",
           "JenisTindakan": "Waran",
-          "JumlahSaham": 24.0,
-          "JumlahSahamSetelahTindakan": 1829804938.0
+          "JumlahSaham": 1914.0,
+          "JumlahSahamSetelahTindakan": 22378490166.0
         },
         {
-          "id": 83298,
+          "id": 83443,
           "KodeEmiten": "MGNA",
-          "TanggalPencatatan": "2026-10-14T00:00:00",
+          "TanggalPencatatan": "2026-11-02T00:00:00",
           "JenisTindakan": "Waran",
           "JumlahSaham": 100.0,
-          "JumlahSahamSetelahTindakan": 3411179835.0
+          "JumlahSahamSetelahTindakan": 3411179935.0
+        },
+        {
+          "id": 83444,
+          "KodeEmiten": "PYFA",
+          "TanggalPencatatan": "2026-11-02T00:00:00",
+          "JenisTindakan": "Waran",
+          "JumlahSaham": 7.0,
+          "JumlahSahamSetelahTindakan": 11236752095.0
+        },
+        {
+          "id": 83432,
+          "KodeEmiten": "CYBR",
+          "TanggalPencatatan": "2026-10-30T00:00:00",
+          "JenisTindakan": "Waran",
+          "JumlahSaham": 2500.0,
+          "JumlahSahamSetelahTindakan": 13488405344.0
+        },
+        {
+          "id": 83433,
+          "KodeEmiten": "ISAP",
+          "TanggalPencatatan": "2026-10-30T00:00:00",
+          "JenisTindakan": "Waran",
+          "JumlahSaham": 80.0,
+          "JumlahSahamSetelahTindakan": 4020382996.0
+        },
+        {
+          "id": 83437,
+          "KodeEmiten": "CSIS",
+          "TanggalPencatatan": "2026-10-30T00:00:00",
+          "JenisTindakan": "Waran",
+          "JumlahSaham": 20.0,
+          "JumlahSahamSetelahTindakan": 1829805180.0
         },
         {
           "id": 83254,
