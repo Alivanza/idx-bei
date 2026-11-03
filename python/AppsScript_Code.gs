@@ -64,8 +64,27 @@ var LEGACY_SHORTLIST_TAB_NAME = "Latest_Top8";
 // hand. Inserting it shifts every column index after it by one in TOP_HEADERS,
 // ALLPASSERS_HEADERS and ALLTICKERS_HEADERS -- see the updated setNumberFormat column
 // indices in formatTop8Rows/writeAllPassers/writeAllTickers below, all changed to match.
+// MEASURE_HEADERS (added 03/11/2026): measurement-only context columns computed by
+// daily_screen.py. They feed NO filter, cap or ranking -- they are there to be read. Appended at
+// the END of every tab that carries them (never inserted), so no existing column index moves:
+// Live_Watch* reference Shortlist/All_Passers/All_Tickers by column letter (C/D/F), and
+// Screen_Log has thousands of older rows under the narrower schema.
+//   EntryDayExcess      stock return on the screen date minus ^JKSE's, a fraction (0.0375 = +3.75pp)
+//   ATR14_capped_pct    ATR14 / price with each session's True Range capped at k x the 14-session median
+//   ATR_SpikeShare      1 - capped ATR / ATR: the fraction of ATR14 that comes from outsized sessions
+//   ATR_SpikeDays       sessions (of 14) whose True Range exceeded the cap
+//   ATR_ticks           ATR14 in IDR / tick size at LastPrice; < 10 ticks = ATR is mostly tick rounding
+//   ATR_LowConfidence   ATR_ticks < 10
+//   ARA_price           the day's ARA ceiling: previous close +35%/+25%/+20% by band, rounded down to tick
+//   ClosedAtARA         Close equals that ceiling (price fact only)
+//   BookLockedAtARA     ...AND no offers left and a bid sitting at the ceiling (end-of-day book)
+//   ARA_days_last5      sessions among the last 5 that closed at ARA
+var MEASURE_HEADERS = ["EntryDayExcess", "ATR14_capped_pct", "ATR_SpikeShare", "ATR_SpikeDays", "ATR_ticks",
+                        "ATR_LowConfidence", "ARA_price", "ClosedAtARA", "BookLockedAtARA", "ARA_days_last5"];
+
 var TOP_HEADERS = ["RunDate", "LastTradingDate", "Ticker", "Name", "Sector", "LastPrice", "LotCost",
-                    "ADTV20", "ATR14_pct", "High20", "DistToHigh20", "ATRsBelowHigh", "BreakoutLast3", "Source"];
+                    "ADTV20", "ATR14_pct", "High20", "DistToHigh20", "ATRsBelowHigh", "BreakoutLast3", "Source"
+                   ].concat(MEASURE_HEADERS);
 
 // Screen_Log uses a DIFFERENT column order from TOP_HEADERS above: High20 is appended as the
 // LAST column here instead of inserted between ATR14_pct and DistToHigh20. Reason: Shortlist
@@ -78,18 +97,41 @@ var TOP_HEADERS = ["RunDate", "LastTradingDate", "Ticker", "Name", "Sector", "La
 // blank for High20 (an honest "not computed for this row"), and nothing that was already
 // correct moves. See getOrCreateScreenLogSheet() below for the one-time header migration
 // this required on an existing Screen_Log tab.
+// Screen_Log carries only EntryDayExcess from MEASURE_HEADERS (column 15, after High20): older rows
+// were back-filled once from the price data; the other measurement columns live on the three
+// "right now" tabs only.
 var SCREENLOG_HEADERS = ["RunDate", "LastTradingDate", "Ticker", "Name", "Sector", "LastPrice", "LotCost",
                           "ADTV20", "ATR14_pct", "DistToHigh20", "ATRsBelowHigh", "BreakoutLast3", "Source",
-                          "High20"];
+                          "High20", "EntryDayExcess"];
 var ALLPASSERS_HEADERS = ["RunDate", "LastTradingDate", "Ticker", "Name", "Sector", "LastPrice",
                            "ADTV20", "ATR14_pct", "High20", "DistToHigh20", "ATRsBelowHigh", "BreakoutLast3",
-                           "IncludedInShortlist"];
+                           "IncludedInShortlist"].concat(MEASURE_HEADERS);
 var ALLTICKERS_HEADERS = ["RunDate", "LastTradingDate", "Ticker", "Name", "Sector", "LastPrice",
                            "ADTV20", "ATR14_pct", "High20", "DistToHigh20", "ATRsBelowHigh", "BreakoutLast3",
                            "F1_Liquidity", "F2_PriceRange", "F3_VolMomentum", "F4_NotZeroTradeFlag",
-                           "F5_NoPendingCA", "PassesAll", "IncludedInShortlist"];
+                           "F5_NoPendingCA", "PassesAll", "IncludedInShortlist"].concat(MEASURE_HEADERS);
 var SECTOR_HEADERS = ["RunDate", "Sector", "Universe", "Passed", "Shortlisted", "PassRate"];
-var NEARMISS_HEADERS = ["RunDate", "Ticker", "Name", "ADTV20", "FailedFilters"];
+// MissDistance (added 03/11/2026): relative shortfall against the ONE filter the ticker failed, so
+// the tab is ordered closest-to-passing first. Blank for binary filters (F4/F5), which sort last.
+var NEARMISS_HEADERS = ["RunDate", "Ticker", "Name", "ADTV20", "FailedFilters", "MissDistance", "MissDetail"];
+
+// The MEASURE_HEADERS values for one record, in header order (null -> blank cell).
+function measureValues(r) {
+  return [r.EntryDayExcess, r.ATR14_capped_pct, r.ATR_SpikeShare, r.ATR_SpikeDays, r.ATR_ticks,
+          r.ATR_LowConfidence, r.ARA_price, r.ClosedAtARA, r.BookLockedAtARA, r.ARA_days_last5];
+}
+
+// Number formats for the MEASURE_HEADERS block starting at column `firstCol`.
+function formatMeasureColumns(sh, startRow, numRows, firstCol) {
+  if (numRows <= 0) return;
+  sh.getRange(startRow, firstCol + 0, numRows, 1).setNumberFormat("0.00%");   // EntryDayExcess
+  sh.getRange(startRow, firstCol + 1, numRows, 1).setNumberFormat("0.00%");   // ATR14_capped_pct
+  sh.getRange(startRow, firstCol + 2, numRows, 1).setNumberFormat("0%");      // ATR_SpikeShare
+  sh.getRange(startRow, firstCol + 3, numRows, 1).setNumberFormat("0");       // ATR_SpikeDays
+  sh.getRange(startRow, firstCol + 4, numRows, 1).setNumberFormat("0.0");     // ATR_ticks
+  sh.getRange(startRow, firstCol + 6, numRows, 1).setNumberFormat("#,##0");   // ARA_price
+  sh.getRange(startRow, firstCol + 9, numRows, 1).setNumberFormat("0");       // ARA_days_last5
+}
 
 // Column colors used consistently across tabs.
 var HEADER_BG = "#1f3864";
@@ -120,6 +162,14 @@ function doPost(e) {
     var runs = body.runs || [];
     appendToLogBulk(ss, runs);
     return ContentService.createTextOutput("OK backfill: " + runs.length + " day(s) written to Screen_Log")
+      .setMimeType(ContentService.MimeType.TEXT);
+  }
+
+  // One-off (backfill_entry_day_excess.py): write EntryDayExcess into EXISTING Screen_Log rows only.
+  // Matches on (LastTradingDate, Ticker); appends, deletes and re-sorts nothing; touches no other column.
+  if (body.mode === "screenlog_ede") {
+    var filled = fillScreenLogEntryDayExcess(ss, body.ede || {});
+    return ContentService.createTextOutput("OK screenlog_ede: " + filled + " Screen_Log row(s) filled")
       .setMimeType(ContentService.MimeType.TEXT);
   }
 
@@ -225,6 +275,7 @@ function formatTop8Rows(sh, startRow, numRows) {
   sh.getRange(startRow, 10, numRows, 1).setNumberFormat("#,##0");          // High20 (IDR)
   sh.getRange(startRow, 11, numRows, 1).setNumberFormat("0.00%");          // DistToHigh20
   sh.getRange(startRow, 12, numRows, 1).setNumberFormat("0.00");           // ATRsBelowHigh (in ATRs, not %)
+  formatMeasureColumns(sh, startRow, numRows, 15);                          // MEASURE_HEADERS start at column 15
   borderRange(sh.getRange(startRow, 1, numRows, TOP_HEADERS.length));
 }
 
@@ -241,6 +292,7 @@ function formatScreenLogRows(sh, startRow, numRows) {
   sh.getRange(startRow, 10, numRows, 1).setNumberFormat("0.00%");          // DistToHigh20
   sh.getRange(startRow, 11, numRows, 1).setNumberFormat("0.00");           // ATRsBelowHigh
   sh.getRange(startRow, 14, numRows, 1).setNumberFormat("#,##0");          // High20 (IDR)
+  sh.getRange(startRow, 15, numRows, 1).setNumberFormat("0.00%");          // EntryDayExcess
   borderRange(sh.getRange(startRow, 1, numRows, SCREENLOG_HEADERS.length));
 }
 
@@ -256,12 +308,46 @@ function getOrCreateScreenLogSheet(ss) {
   var sh = getOrCreateSheet(ss, "Screen_Log");
   if (sh.getLastRow() > 0) {
     var currentHeader = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
-    if (currentHeader.indexOf("High20") === -1) {
+    // Same migration again for EntryDayExcess (03/11/2026): the header row is rewritten once, every
+    // existing data row is left as it was (its new cell reads blank until the one-off back-fill).
+    if (currentHeader.indexOf("High20") === -1 || currentHeader.indexOf("EntryDayExcess") === -1) {
       sh.getRange(1, 1, 1, SCREENLOG_HEADERS.length).setValues([SCREENLOG_HEADERS]);
       styleHeaderRow(sh, SCREENLOG_HEADERS.length);
     }
   }
   return sh;
+}
+
+// Fills the EntryDayExcess column of rows that ALREADY exist in Screen_Log. `ede` is
+// { "YYYY-MM-DD": { "TICKER": value, ... }, ... }. Reads LastTradingDate+Ticker (columns B:C) and the
+// current EntryDayExcess column once, changes only cells whose key has a value in `ede`, and writes
+// that single column back. Row count and order never change. Returns the number of cells set.
+function fillScreenLogEntryDayExcess(ss, ede) {
+  var sh = getOrCreateScreenLogSheet(ss); // also migrates the header row to include EntryDayExcess
+  var lastRow = sh.getLastRow();
+  if (lastRow < 2) return 0;
+  var col = SCREENLOG_HEADERS.indexOf("EntryDayExcess") + 1;
+  var tz = Session.getScriptTimeZone();
+  var keys = sh.getRange(2, 2, lastRow - 1, 2).getValues();   // B = LastTradingDate, C = Ticker
+  var cur = sh.getRange(2, col, lastRow - 1, 1).getValues();
+  var filled = 0;
+  for (var i = 0; i < keys.length; i++) {
+    var d = keys[i][0];
+    var dStr = (d instanceof Date) ? Utilities.formatDate(d, tz, "yyyy-MM-dd") : String(d);
+    var t = keys[i][1];
+    var tStr = (typeof t === "boolean") ? String(t).toUpperCase() : String(t); // ticker "TRUE" can be coerced to a boolean
+    var day = ede[dStr];
+    if (day && Object.prototype.hasOwnProperty.call(day, tStr) && cur[i][0] !== day[tStr]) {
+      cur[i][0] = day[tStr];
+      filled++;
+    }
+  }
+  if (filled) {
+    var rg = sh.getRange(2, col, lastRow - 1, 1);
+    rg.setValues(cur);
+    rg.setNumberFormat("0.00%");
+  }
+  return filled;
 }
 
 // ---- Data tabs -------------------------------------------------------------------
@@ -274,7 +360,8 @@ function writeLatestTop8(ss, body) {
 
   var rows = (body.top || []).map(function (r) {
     return [body.run_date, body.last_trading_date, r.Ticker, r.Name, r.Sector, r.LastPrice, r.LotCost,
-            r.ADTV20, r.ATR14_pct, r.High20, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.Source || "Live"];
+            r.ADTV20, r.ATR14_pct, r.High20, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.Source || "Live"
+           ].concat(measureValues(r));
   });
   if (rows.length) {
     forceTextColumn(sh, 2, rows.length, 3); // Ticker -- see forceTextColumn()
@@ -315,7 +402,8 @@ function appendToLog(ss, body) {
   }
   var rows = (body.top || []).map(function (r) {
     return [body.run_date, body.last_trading_date, r.Ticker, r.Name, r.Sector, r.LastPrice, r.LotCost,
-            r.ADTV20, r.ATR14_pct, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.Source || "Live", r.High20];
+            r.ADTV20, r.ATR14_pct, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.Source || "Live", r.High20,
+            r.EntryDayExcess];
   });
   if (rows.length) {
     var startRow = sh.getLastRow() + 1;
@@ -367,7 +455,8 @@ function appendToLogBulk(ss, runs) {
   runs.forEach(function (body) {
     (body.top || []).forEach(function (r) {
       allRows.push([body.run_date, body.last_trading_date, r.Ticker, r.Name, r.Sector, r.LastPrice, r.LotCost,
-                    r.ADTV20, r.ATR14_pct, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.Source || "Live", r.High20]);
+                    r.ADTV20, r.ATR14_pct, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.Source || "Live", r.High20,
+                    r.EntryDayExcess]);
     });
   });
   if (allRows.length) {
@@ -389,7 +478,8 @@ function writeAllPassers(ss, body) {
 
   var rows = (body.all_passers || []).map(function (r) {
     return [body.run_date, body.last_trading_date, r.Ticker, r.Name, r.Sector, r.LastPrice,
-            r.ADTV20, r.ATR14_pct, r.High20, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.IncludedInShortlist];
+            r.ADTV20, r.ATR14_pct, r.High20, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3, r.IncludedInShortlist
+           ].concat(measureValues(r));
   });
   if (rows.length) {
     forceTextColumn(sh, 2, rows.length, 3); // Ticker -- see forceTextColumn()
@@ -402,6 +492,7 @@ function writeAllPassers(ss, body) {
     sh.getRange(2, 9, rows.length, 1).setNumberFormat("#,##0");        // High20
     sh.getRange(2, 10, rows.length, 1).setNumberFormat("0.00%");       // DistToHigh20
     sh.getRange(2, 11, rows.length, 1).setNumberFormat("0.00");        // ATRsBelowHigh
+    formatMeasureColumns(sh, 2, rows.length, 14);                      // MEASURE_HEADERS start at column 14
     borderRange(sh.getRange(2, 1, rows.length, ALLPASSERS_HEADERS.length));
   }
   sh.setColumnWidths(1, ALLPASSERS_HEADERS.length, 105);
@@ -435,7 +526,7 @@ function writeAllTickers(ss, body) {
     return [body.run_date, body.last_trading_date, r.Ticker, r.Name, r.Sector, r.LastPrice,
             r.ADTV20, r.ATR14_pct, r.High20, r.DistToHigh20, r.ATRsBelowHigh, r.BreakoutLast3,
             r.F1_Liquidity, r.F2_PriceRange, r.F3_VolMomentum, r.F4_NotZeroTradeFlag,
-            r.F5_NoPendingCA, r.PassesAll, r.IncludedInShortlist];
+            r.F5_NoPendingCA, r.PassesAll, r.IncludedInShortlist].concat(measureValues(r));
   });
   if (rows.length) {
     forceTextColumn(sh, 2, rows.length, 3); // Ticker -- see forceTextColumn()
@@ -448,6 +539,7 @@ function writeAllTickers(ss, body) {
     sh.getRange(2, 9, rows.length, 1).setNumberFormat("#,##0");        // High20
     sh.getRange(2, 10, rows.length, 1).setNumberFormat("0.00%");       // DistToHigh20
     sh.getRange(2, 11, rows.length, 1).setNumberFormat("0.00");        // ATRsBelowHigh
+    formatMeasureColumns(sh, 2, rows.length, 20);                      // MEASURE_HEADERS start at column 20
     borderRange(sh.getRange(2, 1, rows.length, ALLTICKERS_HEADERS.length));
   }
   sh.setColumnWidths(1, ALLTICKERS_HEADERS.length, 105);
@@ -485,18 +577,22 @@ function writeNearMisses(ss, body) {
   styleHeaderRow(sh, NEARMISS_HEADERS.length);
 
   var rows = (body.near_misses || []).map(function (r) {
-    return [body.run_date, r.Ticker, r.Name, r.ADTV20, (r.FailedFilters || []).join(", ")];
+    return [body.run_date, r.Ticker, r.Name, r.ADTV20, (r.FailedFilters || []).join(", "),
+            r.MissDistance, r.MissDetail || ""];
   });
   if (rows.length) {
     forceTextColumn(sh, 2, rows.length, 2); // Ticker (col 2 here) -- see forceTextColumn()
     sh.getRange(2, 1, rows.length, NEARMISS_HEADERS.length).setValues(rows);
     sh.getRange(2, 1, rows.length, 1).setNumberFormat("yyyy-mm-dd"); // RunDate
     sh.getRange(2, 4, rows.length, 1).setNumberFormat("#,##0");      // ADTV20
+    sh.getRange(2, 6, rows.length, 1).setNumberFormat("0.0%");       // MissDistance (relative shortfall)
     borderRange(sh.getRange(2, 1, rows.length, NEARMISS_HEADERS.length));
   }
   sh.setColumnWidths(1, 3, 110);
   sh.setColumnWidth(3, 200);
   sh.setColumnWidth(5, 260);
+  sh.setColumnWidth(6, 110);
+  sh.setColumnWidth(7, 300);
 }
 
 function writeMeta(ss, body) {
@@ -587,6 +683,18 @@ function buildGuideTab(ss) {
     ["BreakoutLast3", "TRUE if a new 20-day high was set within the last 3 sessions.", "MAX(High) over the last 3 days > MAX(High) over the prior days 4–20.", ""],
     ["IncludedInShortlist", "(All_Passers only) TRUE if this ticker survived the 2-per-sector cap into Shortlist / Screen_Log.", "See section 3 below.", ""],
     ["Source", "(Shortlist / Screen_Log only) 'Live' = a real daily run; 'Backfill' = a one-time historical replay. Weight backtest conclusions accordingly -- Backfill rows have hindsight bias on F5/Sector (see caveats), Live rows don't.", "Set by daily_screen.py / backfill_screen_log.py.", ""],
+    // ---- Measurement-only columns (03/11/2026): appended at the END of Shortlist / All_Passers / All_Tickers; none feeds a filter, the sector cap or the ranking ----
+    ["EntryDayExcess", "Context to READ, not a gate. The stock's return on the screen date minus ^JKSE's return that day, as a fraction (3.75% = +3.75pp over the index). A same-day move that is large relative to the market tends to be partly given back: across the backtest the within-date rank correlation with forward excess return was about -0.07 at 20d (t = -4.1), but gating on it did not improve the MEAN forward excess return (20d: 5.48 -> 5.76pp with an ede<10pp gate, well inside the confidence interval) -- it moves the median and hit rate, not the mean. Also the ONLY measurement column on Screen_Log (column 15); older Screen_Log rows were back-filled once from the price data. Blank when ^JKSE's return for that date is unavailable.", "(Close[D] / Close[D-1] − 1) − ^JKSE return on D. ^JKSE = IDX COMPOSITE (index_summary.parquet), or Yahoo ^JKSE from backtest_kit/idx_price_history.csv for days the parquet lacks.", ""],
+    ["ATR14_capped_pct", "ATR14_pct recomputed with each session's True Range capped, so one outsized day (a gap, an ARA/ARB session) cannot carry the number. Compare with ATR14_pct. The cap multiple is ATR_SPIKE_CAP_MULT in daily_screen.py (currently 2.0).", "MEAN(MIN(TrueRange_i, k × MEDIAN(TrueRange over the same 14 sessions))) / LastPrice, k = ATR_SPIKE_CAP_MULT. Blank if fewer than 14 sessions or the median TR is 0.", ""],
+    ["ATR_SpikeShare", "Fraction of ATR14 that comes from the part of sessions above the cap. 0% = no outsized sessions; 50% = half of ATR14 is spike.", "1 − (capped ATR14 / ATR14).", ""],
+    ["ATR_SpikeDays", "How many of the 14 sessions had a True Range above the cap.", "COUNT(TrueRange_i > k × median TR).", ""],
+    ["ATR_ticks", "ATR14 expressed in price ticks at LastPrice. Below 10 ticks the ATR is largely tick rounding (a Rp5-tick stock can only move in steps of 5), so ATR14_pct and ATRsBelowHigh are low-precision there.", "ATR14 (IDR) / tick size at LastPrice. Tick: Rp1 below 200, Rp2 from 200, Rp5 from 500, Rp10 from 2,000, Rp25 from 5,000.", ""],
+    ["ATR_LowConfidence", "TRUE when ATR_ticks < 10. A flag only; nothing is filtered on it.", "ATR_ticks < ATR_LOW_CONFIDENCE_TICKS (10).", ""],
+    ["ARA_price", "The day's upper price limit (ARA) for this ticker on LastTradingDate, in IDR, from the previous close and the rule in force on that date: 35% up to Rp200 inclusive, 25% up to Rp5,000 inclusive, 20% above; from 28/09/2026 a flat +Rp1 for previous closes of Rp10 or less. Does not model Special Monitoring Board / IPO-day limits.", "Previous close × (1 + band %), rounded DOWN to the tick of the result.", ""],
+    ["ClosedAtARA", "TRUE when the stock CLOSED exactly at its ARA price (and above the previous close). A price fact only: it does not say whether sellers were still present.", "Close = ARA_price AND Close > Previous.", ""],
+    ["BookLockedAtARA", "TRUE when it closed at ARA AND the end-of-day order book was locked: no offers left and a bid sitting at the ARA price. A stock can close at ARA without being locked (HATM, 20/10/2026: closed at 665 with 381,300 shares still offered at 665 and the best bid back at 660).", "ClosedAtARA AND Offer volume = 0 AND Bid = ARA_price AND Bid volume > 0.", ""],
+    ["ARA_days_last5", "Number of the last 5 sessions (including LastTradingDate) that closed at ARA -- repeated limit-up closes.", "COUNT(ClosedAtARA) over the last 5 sessions.", ""],
+    ["MissDistance", "(Near_Misses only) How far the ticker is from passing the ONE filter it failed, as a relative shortfall against that filter's threshold (0.10 = 10% short). Near_Misses is ordered by this, smallest first; binary misses (F4, F5) have no distance, are left blank and sort last. One normalisation among several: shortfalls of different filters are not strictly comparable.", "F1: (5bn − ADTV20)/5bn. F2: distance outside 50–3,000 relative to the bound crossed. F3: the larger of the ATR14 shortfall vs 3% and the branch miss (ATRsBelowHigh vs 1.0 after a breakout, else DistToHigh20 vs 5%).", ""],
   ];
   sh.getRange(row, 1, colDefs.length, 4).setValues(colDefs).setWrap(true).setVerticalAlignment("top");
   borderRange(sh.getRange(colDefStart - 1, 1, colDefs.length + 1, 4));
@@ -654,9 +762,9 @@ function buildGuideTab(ss) {
     ["All_Passers", "EVERY ticker that passed all 5 filters today (e.g. all 50 on a high-pass day), with Sector and an IncludedInShortlist flag. Overwritten every run.", "", ""],
     ["All_Tickers", "The FULL universe (~950-980 tickers), pass or fail, with each of the 5 filters' individual TRUE/FALSE outcome plus PassesAll -- use this to see exactly why a specific ticker isn't in All_Passers or Shortlist. Live-run only, same as All_Passers -- untouched by backfill_screen_log.py. Overwritten every run.", "", ""],
     ["Sector_Breakdown", "Per-sector counts for today: universe size, how many passed, how many made the shortlist, and the pass rate. Overwritten every run.", "", ""],
-    ["Near_Misses", "Tickers that failed exactly one filter, up to 10, sorted by ADTV20 (a deliberate exception to section 3 -- these failed, so ADTV20 isn't restating a gate they passed). Always populated now, not just on low-pass days.", "", ""],
+    ["Near_Misses", "Tickers that failed exactly one filter, up to 10, ordered by MissDistance (how close each is to passing its one failed filter, smallest first; binary F4/F5 misses last, by ADTV20). Previously ordered by ADTV20. Always populated now, not just on low-pass days. A diagnostic tab: the ordering has no effect on the shortlist.", "", ""],
     ["Run_Info", "Last run timestamp, universe size, pass count, shortlist size, and this run's specific data-quality caveats.", "", ""],
-    ["Live_Watch", "Today's Shortlist tickers with a live(ish) price via GOOGLEFINANCE (Sheets-native, not the Python pipeline) -- ~20 min delayed, and not every smaller IDX ticker has data. For gauging how far price has moved since the screen flagged it, not for order timing. Formulas only, no data of their own -- rebuilt every run, always current as long as the Sheet is open.", "", ""],
+    ["Live_Watch", "Today's Shortlist tickers with GOOGLEFINANCE's LAST TRADE price (Sheets-native, not the Python pipeline) -- ~20 min delayed, and not every smaller IDX ticker has data. Outside IDX trading hours or on a non-trading day that last trade is the previous close, so 'Change vs Screen' can read 0% and 'Last-session Change' is the change of the session in the 'Quote time' column, not necessarily today's: read 'Quote time' and 'Quote date vs screen date' before trusting a row. For gauging drift since the screen, not for order timing. Formulas only, no data of their own -- rebuilt every run.", "", ""],
     ["Live_Watch_Passers", "Same idea as Live_Watch, but sourced from All_Passers instead of Shortlist -- every ticker that passed all 5 filters today, not just the sector-capped shortlist. Provisioned for up to " + LIVE_WATCH_PASSERS_MAX_ROWS + " tickers.", "", ""],
     ["Live_Watch_AllTickers", "Same idea again, but sourced from All_Tickers (the full ~950-980 universe) -- capped to the top " + LIVE_WATCH_ALLTICKERS_MAX_ROWS + " tickers by ADTV20 (liquidity), not the whole universe. That cap is a deliberate choice, not a technical wall: GOOGLEFINANCE has no documented limit on concurrent formulas per sheet, and Live_Watch + Live_Watch_Passers + a full-universe version would run roughly 2,700 of them at once with no track record at that scale. Started at 250, lowered to " + LIVE_WATCH_ALLTICKERS_MAX_ROWS + " as a more conservative liquidity-weighted middle ground; raise LIVE_WATCH_ALLTICKERS_MAX_ROWS in the script if you want more coverage and are willing to test the sheet at that size.", "", ""],
   ];
@@ -708,21 +816,36 @@ function buildLiveWatchFromSource(ss, sourceTab, tabName, maxRows, capNote) {
   var sh = getOrCreateSheet(ss, tabName);
   sh.clear();
 
-  var headers = ["Ticker", "Name", "Screen LastPrice (IDR)", "Live Price (IDR, ~20min delay)",
-                 "Change vs Screen", "Today's Change (live)"];
+  // Relabelled 03/11/2026. The old headers ("Live Price", "Today's Change (live)") claimed a vintage
+  // the numbers don't have: GOOGLEFINANCE returns the LAST TRADE, which outside IDX trading hours
+  // (or on a non-trading day) is the previous close, and "changepct" is the change of THAT session.
+  // On such a day the old "Today's Change" column simply repeated a past session (BBCA showed
+  // +7.8838%, the 20/10 session, long after). Columns A-F keep their positions; G and H are new:
+  // G = when Google's quote was struck, H = how that date compares with the screen's date.
+  var headers = ["Ticker", "Name", "Screen LastPrice (IDR)", "Last Trade Price (IDR; = last close when market closed)",
+                 "Change vs Screen", "Last-session Change (session of Quote time)",
+                 "Quote time (GOOGLEFINANCE tradetime)", "Quote date vs screen date"];
   sh.getRange(1, 1, 1, headers.length).setValues([headers]);
   styleHeaderRow(sh, headers.length);
+  sh.getRange(1, 1, 1, headers.length).setWrap(true);
 
   var tailNote = capNote ||
     ("Rows beyond today's actual " + sourceTab + " row count just show blank.");
+  var screenAsOf = "";
+  var srcSheet = ss.getSheetByName(sourceTab);
+  if (srcSheet && srcSheet.getLastRow() >= 2) screenAsOf = String(srcSheet.getRange(2, 2).getDisplayValue());
+  var builtAt = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm");
   sh.getRange(2, 1, 1, headers.length).merge()
-    .setValue("GOOGLEFINANCE (Sheets-native, not the Python pipeline), sourced from " + sourceTab + ": " +
-              "~20 min delayed, and not every smaller/less-liquid IDX ticker has data (shows \"No data\" " +
-              "when GOOGLEFINANCE can't find it). Use this to gauge how far price has moved since the " +
-              "screen flagged it at LastTradingDate's close -- not as an order-timing or execution-price " +
-              "reference. " + tailNote)
+    .setValue("AS OF: screen data " + (screenAsOf || "(no rows)") + " (LastTradingDate close); this tab was rebuilt " +
+              builtAt + ". Prices are GOOGLEFINANCE (Sheets-native, not the Python pipeline) and recalculate " +
+              "on their own while the Sheet is open, so read each row's 'Quote time': it is the moment of Google's " +
+              "last trade for that ticker. Outside IDX trading hours, or on a non-trading day, that is the previous " +
+              "close, so 'Change vs Screen' can read 0% and 'Last-session Change' is the change of the session in " +
+              "'Quote time', NOT necessarily today's. Quotes are ~20 min delayed and not every smaller IDX ticker " +
+              "has data (\"No data\"). For gauging drift since the screen, not as an order-timing or " +
+              "execution-price reference. " + tailNote)
     .setFontStyle("italic").setWrap(true).setBackground(SECTION_BG);
-  sh.setRowHeight(2, 40);
+  sh.setRowHeight(2, 90);
 
   var startRow = 3;
   var formulas = [];
@@ -739,6 +862,11 @@ function buildLiveWatchFromSource(ss, sourceTab, tabName, maxRows, capNote) {
       "=IF(A" + r + "=\"\";\"\";IFERROR(GOOGLEFINANCE(\"IDX:\"&A" + r + ";\"price\");\"No data\"))",
       "=IF(OR(A" + r + "=\"\";NOT(ISNUMBER(D" + r + "));C" + r + "=0);\"\";(D" + r + "-C" + r + ")/C" + r + ")",
       "=IF(OR(A" + r + "=\"\";NOT(ISNUMBER(D" + r + ")));\"\";IFERROR(GOOGLEFINANCE(\"IDX:\"&A" + r + ";\"changepct\")/100;\"\"))",
+      // G: when the quote was struck. Verified in the live Sheet on 03/11/2026 (returned 11:11 that day).
+      "=IF(A" + r + "=\"\";\"\";IFERROR(GOOGLEFINANCE(\"IDX:\"&A" + r + ";\"tradetime\");\"No data\"))",
+      // H: compare the quote's DATE with the screen's LastTradingDate (column B of the source tab).
+      "=IF(OR(A" + r + "=\"\";NOT(ISNUMBER(G" + r + ")));\"\";IF(INT(G" + r + ")>" + sourceTab + "!$B$2;\"Newer than screen\";" +
+        "IF(INT(G" + r + ")=" + sourceTab + "!$B$2;\"Same date as screen (no new session)\";\"OLDER than screen (stale quote)\")))",
     ]);
   }
   var range = sh.getRange(startRow, 1, maxRows, headers.length);
@@ -747,15 +875,18 @@ function buildLiveWatchFromSource(ss, sourceTab, tabName, maxRows, capNote) {
   sh.getRange(startRow, 3, maxRows, 1).setNumberFormat("#,##0");      // Screen LastPrice
   sh.getRange(startRow, 4, maxRows, 1).setNumberFormat("#,##0");      // Live Price
   sh.getRange(startRow, 5, maxRows, 1).setNumberFormat("0.00%");      // Change vs Screen
-  sh.getRange(startRow, 6, maxRows, 1).setNumberFormat("0.00%");      // Today's Change
+  sh.getRange(startRow, 6, maxRows, 1).setNumberFormat("0.00%");      // Last-session Change
+  sh.getRange(startRow, 7, maxRows, 1).setNumberFormat("dd/mm/yyyy hh:mm"); // Quote time
   borderRange(sh.getRange(1, 1, maxRows + startRow - 1, headers.length));
 
   sh.setColumnWidth(1, 90);
   sh.setColumnWidth(2, 220);
   sh.setColumnWidth(3, 150);
-  sh.setColumnWidth(4, 170);
+  sh.setColumnWidth(4, 200);
   sh.setColumnWidth(5, 120);
-  sh.setColumnWidth(6, 140);
+  sh.setColumnWidth(6, 190);
+  sh.setColumnWidth(7, 170);
+  sh.setColumnWidth(8, 250);
   sh.setFrozenRows(2);
 }
 

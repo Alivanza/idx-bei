@@ -42,6 +42,29 @@ WINDOW_ADTV_HIGH = 20   # trading days
 WINDOW_ATR = 14         # trading days
 CA_LOOKAHEAD_DAYS = 10  # trading days
 
+# ---- Measurement-only additions (03/11/2026) -------------------------------------------
+# NOTHING below feeds F1-F5, PassesAll, the sector cap or the Shortlist ranking. These are
+# context columns to read, not gates. (Near_Misses ordering is the one display-order change;
+# it is a diagnostic tab, not the shortlist.)
+ATR_SPIKE_CAP_MULT = 2.0        # cap each session's True Range at this multiple of the 14-session median TR
+ATR_LOW_CONFIDENCE_TICKS = 10   # ATR14 smaller than this many price ticks is dominated by tick rounding
+SECTOR_STALE_DAYS = 180         # warn in Run_Info when the sector snapshot is older than this
+RECENT_ARA_WINDOW = 5           # sessions counted by ARA_days_last5
+
+# IDX auto-rejection ATAS (ARA) regimes, keyed by the date the regime takes effect. Each band is
+# (upper bound of the PREVIOUS close, inclusive; kind; value). Source: BEI Directors' Decision
+# Kep-00136/BEI/09-2026 (21/09/2026), as reported by Katadata and Detik: from 28/09/2026 the
+# minimum price falls from Rp50 to Rp1 and prices Rp1-Rp10 move by an absolute Rp1; the percentage
+# bands for Rp11+ are unchanged (35% up to Rp200 inclusive, 25% up to Rp5,000 inclusive, 20% above).
+# ARB is deliberately NOT modelled here: it changes on several dates (28/09, 19/10, 1/1/2027) and
+# one of those (19-20/10) I could not confirm from a readable source.
+ARA_REGIMES = [
+    (pd.Timestamp("1900-01-01"), [(200, "pct", 0.35), (5000, "pct", 0.25), (np.inf, "pct", 0.20)]),
+    (pd.Timestamp("2026-09-28"), [(10, "abs", 1.0), (200, "pct", 0.35), (5000, "pct", 0.25), (np.inf, "pct", 0.20)]),
+]
+# Not modelled (not in stock_summary.parquet): Special Monitoring Board / full-call-auction names and
+# IPO first-day limits. They use different limits, so ClosedAtARA can under-count on those names.
+
 
 def load_config():
     """Env vars WEBAPP_URL / SHARED_SECRET win when set (GitHub Actions secrets land here
@@ -82,6 +105,146 @@ def load_sector_map():
     return sector_map, caveat
 
 
+def sector_staleness_caveat(reference_date):
+    """Returns a WARNING string when the sector snapshot (financial_ratios.parquet) is older than
+    SECTOR_STALE_DAYS relative to `reference_date` (age = reference_date minus the newest fsDate in
+    the file), else None. Re-sourcing is `uv run idx financial` then `uv run idx parquet`; it can
+    change sector assignments and therefore the 2-per-sector shortlist cap, so diff the shortlist
+    before and after."""
+    if not os.path.exists(FIN_RATIOS_PATH):
+        return None
+    fr = pd.read_parquet(FIN_RATIOS_PATH, columns=["fsDate"])
+    latest_fs = pd.to_datetime(fr["fsDate"], errors="coerce").max()
+    if pd.isna(latest_fs):
+        return None
+    ref = pd.Timestamp(reference_date)
+    fs_age = (ref - latest_fs).days
+    if fs_age <= SECTOR_STALE_DAYS:
+        return None
+    # The file's modification time is deliberately NOT used: `uv run idx parquet` rewrites every
+    # parquet on each run, so mtime says "recently written", not "recently sourced".
+    return (f"WARNING - STALE SECTOR SNAPSHOT: newest financial-statement date in financial_ratios.parquet is "
+            f"{latest_fs.date()} ({fs_age} days before {ref.date()}, limit {SECTOR_STALE_DAYS}). The 2-per-sector "
+            f"cap uses this classification, so a name that changed sector, or a newly listed one ('Unclassified'), "
+            f"is capped on stale data. To re-source: `uv run idx financial` then `uv run idx parquet`, and diff "
+            f"the shortlist before and after (a changed sector changes who survives the cap).")
+
+
+def tick_size(price):
+    """IDX price fraction (fraksi harga) for equities: Rp1 below Rp200, Rp2 from Rp200 to below Rp500,
+    Rp5 from Rp500 to below Rp2,000, Rp10 from Rp2,000 to below Rp5,000, Rp25 from Rp5,000. Lower
+    bounds are INCLUSIVE (a price of exactly Rp200 has a Rp2 tick). Standard IDX table; I could not
+    re-confirm it against a readable source for the 28/09/2026 Rp1-minimum change."""
+    p = np.asarray(price, dtype=float)
+    t = np.select([p < 200, p < 500, p < 2000, p < 5000], [1.0, 2.0, 5.0, 10.0], default=25.0)
+    return np.where(np.isnan(p), np.nan, t)
+
+
+def ara_price(prev_close, dates):
+    """Upper price limit (ARA) for each row from the PREVIOUS close and the trading date, using the
+    regime in force on that date (ARA_REGIMES). Percentage limits are rounded DOWN to the tick of the
+    resulting price. Checked against 329,631 stock-days in stock_summary.parquet: no High exceeds
+    this value, and 2,055 closes land exactly on it."""
+    prev = np.asarray(prev_close, dtype=float)
+    dts = pd.to_datetime(np.asarray(dates)).values
+    out = np.full(prev.shape, np.nan)
+    for i, (eff, bands) in enumerate(ARA_REGIMES):
+        nxt = ARA_REGIMES[i + 1][0] if i + 1 < len(ARA_REGIMES) else None
+        in_regime = dts >= np.datetime64(eff)
+        if nxt is not None:
+            in_regime &= dts < np.datetime64(nxt)
+        lo = -np.inf
+        for hi, kind, val in bands:
+            m = in_regime & (prev > lo) & (prev <= hi)
+            if kind == "abs":
+                out = np.where(m, prev + val, out)
+            else:
+                raw = prev * (1.0 + val)
+                t = tick_size(raw)
+                out = np.where(m, np.floor(raw / t + 1e-9) * t, out)
+            lo = hi
+    return out
+
+
+_BENCH_CACHE = {}
+
+
+def load_benchmark_returns():
+    """{Timestamp: daily return of ^JKSE}. Primary source: IDX COMPOSITE in index_summary.parquet
+    (Close/Previous - 1), which equals Yahoo's ^JKSE to about 1e-8 over the 20 overlapping days.
+    index_summary.parquet only holds 14/09/2026 onward and is missing 12-16/10/2026, so those days,
+    and everything before 14/09/2026, fall back to ^JKSE close-to-close from
+    backtest_kit/idx_price_history.csv when that file exists. Days in neither source are absent
+    (EntryDayExcess is then blank, not guessed)."""
+    if "r" in _BENCH_CACHE:
+        return _BENCH_CACHE["r"]
+    rets = {}
+    csv_path = os.path.abspath(os.path.join(HERE, "..", "backtest_kit", "idx_price_history.csv"))
+    if os.path.exists(csv_path):
+        try:
+            ph = pd.read_csv(csv_path, usecols=["Ticker", "Date", "Close"], parse_dates=["Date"])
+            j = ph[ph["Ticker"] == "^JKSE"].sort_values("Date")
+            r = j["Close"].pct_change()
+            rets.update({pd.Timestamp(d): float(v) for d, v in zip(j["Date"], r) if pd.notna(v)})
+        except Exception as e:  # optional input: never let it break the screen
+            print(f"NOTE: could not read ^JKSE fallback from {csv_path}: {e!r}")
+    ix_path = os.path.join(PARQUET_DIR, "index_summary.parquet")
+    if os.path.exists(ix_path):
+        ix = pd.read_parquet(ix_path, columns=["Date", "IndexCode", "Close", "Previous"])
+        c = ix[ix["IndexCode"] == "COMPOSITE"]
+        for d, cl, pv in zip(c["Date"], c["Close"], c["Previous"]):
+            if pd.notna(cl) and pd.notna(pv) and pv:
+                rets[pd.Timestamp(d)] = float(cl / pv - 1.0)  # IDX value wins where both exist
+    _BENCH_CACHE["r"] = rets
+    return rets
+
+
+def miss_distance(r):
+    """How far a ticker that failed EXACTLY ONE filter is from passing it: (distance, detail).
+    Distance is the relative shortfall against the threshold, so 0.10 means 10% short of it:
+      F1  (MIN_ADTV - ADTV20) / MIN_ADTV
+      F2  distance outside [PRICE_MIN, PRICE_MAX], relative to the bound crossed
+      F3  the larger of (ATR shortfall vs MIN_ATR_PCT) and (the branch-specific miss: ATRsBelowHigh
+          vs MAX_ATRS_BELOW_HIGH if a breakout fired, else DistToHigh20 vs MAX_DIST_TO_HIGH)
+      F4/F5  binary flags with no continuum -> distance None (ranked after the continuous misses).
+    One defensible normalisation, not a market fact: relative shortfalls of different filters are
+    not strictly comparable."""
+    if not bool(r["F1_Liquidity"]):
+        a = r["ADTV20"]
+        if pd.isna(a):
+            return None, "ADTV20 missing"
+        return (MIN_ADTV - a) / MIN_ADTV, f"ADTV20 {a/1e9:.2f}bn vs {MIN_ADTV/1e9:.2f}bn"
+    if not bool(r["F2_PriceRange"]):
+        p = r["LastPrice"]
+        if p < PRICE_MIN:
+            return (PRICE_MIN - p) / PRICE_MIN, f"price {p:,.0f} below {PRICE_MIN}"
+        return (p - PRICE_MAX) / PRICE_MAX, f"price {p:,.0f} above {PRICE_MAX:,}"
+    if not bool(r["F3_VolMomentum"]):
+        parts, notes = [], []
+        atr = r["ATR14_pct"]
+        if pd.isna(atr):
+            return None, "ATR14 missing"
+        if atr < MIN_ATR_PCT:
+            parts.append((MIN_ATR_PCT - atr) / MIN_ATR_PCT)
+            notes.append(f"ATR14 {atr:.2%} vs {MIN_ATR_PCT:.0%}")
+        if bool(r["BreakoutLast3"]):
+            a = r["ATRsBelowHigh"]
+            if pd.notna(a) and a > MAX_ATRS_BELOW_HIGH:
+                parts.append((a - MAX_ATRS_BELOW_HIGH) / MAX_ATRS_BELOW_HIGH)
+                notes.append(f"breakout but {a:.2f} ATRs below high vs {MAX_ATRS_BELOW_HIGH:g}")
+        else:
+            d = r["DistToHigh20"]
+            if pd.notna(d) and d > MAX_DIST_TO_HIGH:
+                parts.append((d - MAX_DIST_TO_HIGH) / MAX_DIST_TO_HIGH)
+                notes.append(f"{d:.1%} below 20d high vs {MAX_DIST_TO_HIGH:.0%}")
+        if not parts:
+            return None, "F3 failed on missing inputs"
+        return max(parts), "; ".join(notes)
+    if not bool(r["F4_NotZeroTradeFlag"]):
+        return None, "binary: no volume or frequency in last 3 sessions"
+    return None, "binary: corporate action listing within the lookahead window"
+
+
 def run_screen(as_of_date=None):
     """as_of_date (optional): truncate stock_summary to Date <= as_of_date before computing
     every rolling window, so the screen only sees what would have been available on that
@@ -110,6 +273,25 @@ def run_screen(as_of_date=None):
     ])
 
     last_date = ss["Date"].max()
+
+    # ---- measurement-only per-row fields (see the block of constants near the top) ----
+    # ARA ceiling for each session from that session's previous close, and whether the session
+    # closed on it. "Closed at ARA" is a PRICE fact (Close equals the ceiling and is above the
+    # previous close); "book locked" additionally needs the end-of-day order book to show no
+    # offers and a bid sitting at the ceiling. HATM on 20/10/2026 closed at ARA (665) but was NOT
+    # locked: 381,300 shares were still offered at 665 with the best bid back at 660.
+    ss["ARA_px"] = ara_price(ss["Previous"].values, ss["Date"].values)
+    ss["ClosedAtARA_row"] = ((ss["Close"] == ss["ARA_px"]) & (ss["Close"] > ss["Previous"])).fillna(False)
+    ss["LockedAtARA_row"] = (ss["ClosedAtARA_row"] & (ss["Offer"].fillna(0) == 0) &
+                             (ss["OfferVolume"].fillna(0) == 0) & (ss["Bid"] == ss["ARA_px"]) &
+                             (ss["BidVolume"].fillna(0) > 0))
+    bench = load_benchmark_returns()
+    bench_ret = bench.get(pd.Timestamp(last_date))
+    # The universe below is every ticker with ANY row on file (~980), but only ~963 have a row on
+    # last_date; the rest are stale (delisted or long-suspended: their "last" row is an old date).
+    # Same-day measurements (EntryDayExcess, ClosedAtARA, ARA_price...) are blank/False for those,
+    # and "last 5 sessions" means the last 5 market dates, not the ticker's last 5 rows.
+    last_sessions = sorted(ss["Date"].unique())[-RECENT_ARA_WINDOW:]
 
     rows = []
     for code, g in ss.groupby("StockCode"):
@@ -144,6 +326,31 @@ def run_screen(as_of_date=None):
         last3_freq = g[g["rank_desc"] <= 2]["Frequency"].sum()
         zero_recent = (last3_vol == 0 and last3_freq == 0)
 
+        # EntryDayExcess: the stock's return on the screen date minus ^JKSE's return that day
+        # (Close[D]/Close[D-1] - 1 for the stock). A fraction, shown as a %: 0.0375 = +3.75pp.
+        # Context for reading a setup, NOT a filter (gating on it did not improve mean excess
+        # return: 20d 5.48 -> 5.76pp with an ede<10pp gate, inside the CI).
+        on_last_date = pd.Timestamp(last["Date"]) == pd.Timestamp(last_date)
+        prev_close = last["PrevClose"]
+        ede = ((last_price / prev_close - 1.0) - bench_ret) if (on_last_date and pd.notna(prev_close) and prev_close and bench_ret is not None) else np.nan
+
+        # ATR spike decomposition: how much of ATR14 is one or two outsized sessions. Each session's
+        # True Range is capped at ATR_SPIKE_CAP_MULT x the median TR of the same 14 sessions.
+        tr_vals = win_atr["TrueRange"].values
+        atr_capped_pct = spike_share = spike_days = np.nan
+        if len(tr_vals) >= WINDOW_ATR and pd.notna(atr) and atr > 0:
+            med_tr = float(np.median(tr_vals))
+            if med_tr > 0:  # median of 0 means more than half the sessions had no range: cap is meaningless
+                cap = ATR_SPIKE_CAP_MULT * med_tr
+                capped_mean = float(np.minimum(tr_vals, cap).mean())
+                atr_capped_pct = capped_mean / last_price
+                spike_share = 1.0 - capped_mean / atr
+                spike_days = int((tr_vals > cap).sum())
+
+        # ATR in price ticks: below ATR_LOW_CONFIDENCE_TICKS the ATR is mostly tick rounding.
+        atr_ticks = (atr / float(tick_size(last_price))) if (pd.notna(atr) and atr > 0) else np.nan
+
+        recent_ara = g[g["Date"].isin(last_sessions)]
         rows.append(dict(
             Ticker=code, Name=last["StockName"], Sector=sector_map.get(code, "Unclassified"),
             LastPrice=float(last_price), LotCost=float(last_price) * 100,
@@ -153,6 +360,16 @@ def run_screen(as_of_date=None):
             DistToHigh20=float(dist_to_high) if pd.notna(dist_to_high) else None,
             ATRsBelowHigh=float(atrs_below_high) if pd.notna(atrs_below_high) else None,
             BreakoutLast3=bool(breakout), ZeroTradeLast3=bool(zero_recent),
+            EntryDayExcess=float(ede) if pd.notna(ede) else None,
+            ATR14_capped_pct=float(atr_capped_pct) if pd.notna(atr_capped_pct) else None,
+            ATR_SpikeShare=float(spike_share) if pd.notna(spike_share) else None,
+            ATR_SpikeDays=int(spike_days) if pd.notna(spike_days) else None,
+            ATR_ticks=float(atr_ticks) if pd.notna(atr_ticks) else None,
+            ATR_LowConfidence=bool(atr_ticks < ATR_LOW_CONFIDENCE_TICKS) if pd.notna(atr_ticks) else None,
+            ARA_price=float(last["ARA_px"]) if (on_last_date and pd.notna(last["ARA_px"])) else None,
+            ClosedAtARA=bool(last["ClosedAtARA_row"]) if on_last_date else False,
+            BookLockedAtARA=bool(last["LockedAtARA_row"]) if on_last_date else False,
+            ARA_days_last5=int(recent_ara["ClosedAtARA_row"].sum()),
         ))
 
     df = pd.DataFrame(rows)
@@ -219,7 +436,22 @@ def run_screen(as_of_date=None):
     # surfaces the next tier down instead of leaving this tab silently empty.
     fail_count = (~df_sorted[["F1_Liquidity", "F2_PriceRange", "F3_VolMomentum",
                                "F4_NotZeroTradeFlag", "F5_NoPendingCA"]]).sum(axis=1)
-    near_misses = df_sorted[(fail_count == 1)].head(10).copy()
+    # Ranked by MissDistance (see miss_distance()): the tickers that are closest to passing their one
+    # failed filter come first, instead of simply the largest by ADTV20. Binary misses (F4/F5) have
+    # no distance and follow the continuous ones, ADTV20 descending, as before. This is a display
+    # order for a diagnostic tab; it does not touch the shortlist.
+    near_misses = df_sorted[(fail_count == 1)].copy()
+    if len(near_misses):
+        md = near_misses.apply(miss_distance, axis=1, result_type="expand")
+        near_misses["MissDistance"] = md[0].astype(float)
+        near_misses["MissDetail"] = md[1]
+        near_misses["_binary"] = near_misses["MissDistance"].isna()
+        near_misses = (near_misses.sort_values(["_binary", "MissDistance", "ADTV20"],
+                                               ascending=[True, True, False], kind="stable")
+                       .head(10).drop(columns="_binary"))
+    else:
+        near_misses["MissDistance"] = pd.Series(dtype=float)
+        near_misses["MissDetail"] = pd.Series(dtype=object)
 
     # Sector breakdown: universe / passed / shortlisted counts per IDX-IC sector, so a
     # 50-pass day is legible even without listing all 50 (Sector_Breakdown tab) --
@@ -246,6 +478,19 @@ def run_screen(as_of_date=None):
         "F4 (ARA/ARB/UMA) uses a same-day zero-volume proxy, not IDX's official suspension/UMA feed -- verify manually before acting.",
         sector_caveat,
     ]
+    if as_of_date is None:  # a historical replay uses today's snapshot by design (hindsight caveat below)
+        stale = sector_staleness_caveat(last_date)
+        if stale:
+            caveats.insert(0, stale)
+    # Standing caveat (item 2d of the 03/11/2026 audit): the regime split is not testable.
+    caveats.append(
+        "REGIME SPLIT NOT TESTABLE: short selling resumed 15/09/2026 (per BCA Sekuritas), but Backtest_Results only "
+        "contains screen dates through 2026-09-10 (later days lack complete forward windows), so a before/after "
+        "2026-10-01 comparison has no post-period sample. Read Backtest_Results as pre-resumption evidence only."
+    )
+    if bench_ret is None:
+        caveats.append(f"EntryDayExcess blank this run: no ^JKSE return found for {pd.Timestamp(last_date).date()} "
+                       f"in index_summary.parquet or backtest_kit/idx_price_history.csv.")
     if len(passers) and not apply_cap:
         caveats.append(f"Sector cap NOT applied this run ({len(passers)} passers all 'Unclassified') -- see sector caveat above.")
     if as_of_date is not None:
@@ -262,6 +507,27 @@ def run_screen(as_of_date=None):
     )
 
 
+def _num(v, nd):
+    return round(float(v), nd) if (v is not None and pd.notna(v)) else None
+
+
+def measurement_fields(r):
+    """The measurement-only columns, shaped for JSON (None for blank). Appended at the END of every
+    tab so no existing column moves. Rounded like the neighbouring columns (fractions to 4 dp)."""
+    return dict(
+        EntryDayExcess=_num(r.get("EntryDayExcess"), 4),
+        ATR14_capped_pct=_num(r.get("ATR14_capped_pct"), 4),
+        ATR_SpikeShare=_num(r.get("ATR_SpikeShare"), 3),
+        ATR_SpikeDays=int(r["ATR_SpikeDays"]) if pd.notna(r.get("ATR_SpikeDays")) else None,
+        ATR_ticks=_num(r.get("ATR_ticks"), 2),
+        ATR_LowConfidence=bool(r["ATR_LowConfidence"]) if pd.notna(r.get("ATR_LowConfidence")) else None,
+        ARA_price=_num(r.get("ARA_price"), 2),
+        ClosedAtARA=bool(r["ClosedAtARA"]),
+        BookLockedAtARA=bool(r["BookLockedAtARA"]),
+        ARA_days_last5=int(r["ARA_days_last5"]),
+    )
+
+
 def to_shortlist_records(shortlist_df, source="Live"):
     out = []
     for _, r in shortlist_df.iterrows():
@@ -274,6 +540,7 @@ def to_shortlist_records(shortlist_df, source="Live"):
             ATRsBelowHigh=round(r["ATRsBelowHigh"], 3) if pd.notna(r["ATRsBelowHigh"]) else None,
             BreakoutLast3=bool(r["BreakoutLast3"]),
             Source=source,  # "Live" = real daily run, "Backfill" = historical replay (see caveats)
+            **measurement_fields(r),
         ))
     return out
 
@@ -290,6 +557,7 @@ def to_all_passers_records(passers_df):
             ATRsBelowHigh=round(r["ATRsBelowHigh"], 3) if pd.notna(r["ATRsBelowHigh"]) else None,
             BreakoutLast3=bool(r["BreakoutLast3"]),
             IncludedInShortlist=bool(r["IncludedInShortlist"]),
+            **measurement_fields(r),
         ))
     return out
 
@@ -316,6 +584,7 @@ def to_all_tickers_records(df, shortlist_tickers):
             F3_VolMomentum=bool(r["F3_VolMomentum"]), F4_NotZeroTradeFlag=bool(r["F4_NotZeroTradeFlag"]),
             F5_NoPendingCA=bool(r["F5_NoPendingCA"]), PassesAll=bool(r["PassesAll"]),
             IncludedInShortlist=bool(r["Ticker"] in shortlist_tickers),
+            **measurement_fields(r),
         ))
     return out
 
@@ -350,7 +619,8 @@ def build_payload(cfg, as_of_date=None, run_date=None, source="Live"):
         ],
         "near_misses": [
             {"Ticker": row["Ticker"], "Name": row.get("Name", ""), "ADTV20": row["ADTV20"],
-             "FailedFilters": failed_filters(row)}
+             "FailedFilters": failed_filters(row),
+             "MissDistance": _num(row.get("MissDistance"), 4), "MissDetail": row.get("MissDetail", "")}
             for _, row in near_misses.iterrows()
         ] if len(near_misses) else [],
         "caveats": r["caveats"],
