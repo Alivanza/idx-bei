@@ -2,6 +2,7 @@
 Financial ratios and statistics scraper module.
 """
 
+import datetime
 import os
 import time
 
@@ -48,11 +49,8 @@ def build_url(page_number, year=2024, quarter=4, page_size=100):
     return f"{BASE_URL}?{urlencode(params)}"
 
 
-def fetch_financial_ratios(year=2024, quarter=4, client=None, page_size=100):
-    """Fetches paginated financial data and ratios across all companies."""
-    if client is None:
-        client = IDXClient()
-
+def _fetch_period_records(client, year, quarter, page_size):
+    """Pages through one reporting period and returns the raw records (possibly empty)."""
     endpoint = "/DigitalStatistic/GetApiDataPaginated"
     base_params = {
         **QUERY_PARAMS,
@@ -89,12 +87,47 @@ def fetch_financial_ratios(year=2024, quarter=4, client=None, page_size=100):
             time.sleep(1.0)
         else:
             has_more = False
+    return all_records
+
+
+def fetch_financial_ratios(year=None, quarter=4, client=None, page_size=100):
+    """Fetches paginated financial data and ratios across all companies.
+
+    year=None (the default, used by `uv run idx financial`) means "the freshest period IDX serves":
+    the current calendar year is tried first, then the previous one. Probed 05/11/2026: asking for
+    2026 (Q1 and Q2 gave byte-identical responses) returns the latest filings (fsDate up to 2026-09-30,
+    963 tickers, every currently listed ticker has a sector); asking for 2025 Q4 returns the FY2025
+    file (958 tickers, 26 of the 33 newest listings); 2024 Q4 returns the old 947-ticker file. The
+    default used to be a hard-coded 2024 Q4, which is why the sector snapshot went stale. Pass an
+    explicit year to pin a period (fetch_historical_financial_ratios does).
+    """
+    if client is None:
+        client = IDXClient()
+
+    if year is None:
+        this_year = datetime.date.today().year
+        candidates = [this_year, this_year - 1]
+    else:
+        candidates = [year]
+
+    all_records = []
+    used_year = None
+    for y in candidates:
+        all_records = _fetch_period_records(client, y, quarter, page_size)
+        if all_records:
+            used_year = y
+            break
+        log.warning("No financial ratio records for year %d quarter %d.", y, quarter)
 
     if all_records:
         result = {"totalRecords": len(all_records), "data": all_records}
         save_json(OUTPUT_FILE, result)
         check_count_anomaly("financial_ratio", len(all_records))
-        log.info("Financial ratios collection finished: %d records.", len(all_records))
+        fs_dates = [r.get("fsDate") for r in all_records if r.get("fsDate")]
+        log.info(
+            "Financial ratios collection finished: %d records (requested year %s, newest fsDate %s).",
+            len(all_records), used_year, max(fs_dates) if fs_dates else "unknown",
+        )
         return result
 
     log.warning("No financial ratio records collected.")
