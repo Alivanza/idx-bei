@@ -189,9 +189,10 @@ function doPost(e) {
   // payload below.
   if (body.mode === "prices_daily") {
     var dailyRows = body.rows || [];
-    appendDailyPrices(ss, dailyRows, body.date);
+    var dailyPath = appendDailyPrices(ss, dailyRows, body.date);
     return ContentService.createTextOutput(
-      "OK prices_daily (" + body.date + "): " + dailyRows.length + " row(s) written to " + DAILY_PRICES_TAB_NAME
+      "OK prices_daily (" + body.date + "): " + dailyRows.length + " row(s) written to " + DAILY_PRICES_TAB_NAME +
+      " [" + dailyPath + "]"
     ).setMimeType(ContentService.MimeType.TEXT);
   }
 
@@ -1039,16 +1040,47 @@ function appendDailyPricesInit(ss, rows) {
 }
 
 // mode "prices_daily" -- ONGOING update, one call per trading day from daily_screen.py.
-// Mirrors appendToLogBulk's dedupe pattern elsewhere in this file: one bulk read of the
-// Date column, delete any rows already present for TODAY's date (so a retried/re-run daily
-// post replaces that day's block instead of duplicating it), then bulk-insert. This is a
-// single-date scan even once the tab has hundreds of thousands of historical rows in it --
-// still one bulk getValues() call, not a per-row operation, same as the rest of this file's
-// established pattern.
+//
+// Two paths (returned as a label that doPost echoes, so the run output shows which one ran):
+//  - "fast append": `date` is strictly later than every date in the last DAILY_PRICES_TAIL_ROWS
+//    rows of column C (and all of those cells are valid dates). Nothing for `date` can exist
+//    higher up, because blocks are appended at the end, so no scan or delete is needed: read
+//    ~5,000 cells, append. This is every normal trading day. The old path read the whole Date
+//    column (377k rows on 05/11/2026, +963 per trading day) and timed out client-side at 330 s
+//    on 02/11/2026 with nothing appended.
+//  - "replace (scan)": anything else -- a re-post of a date already in the tail, an out-of-order
+//    catch-up (a date older than something in the tail), an empty tail, or a cell that does not
+//    parse as a date. Same behaviour as before: one bulk read of column C, bulk-delete every
+//    row for `date`, then append, so a retried/re-run post replaces that day's block instead
+//    of duplicating it. Idempotent re-posting is therefore preserved.
+// Assumption behind the fast path: no block for a LATER date sits more than
+// DAILY_PRICES_TAIL_ROWS rows above the end (true unless 5+ out-of-order blocks were appended
+// after it). If that were ever violated the fast path could duplicate a block; the audit
+// function below (auditDailyPricesCounts) would show it.
+var DAILY_PRICES_TAIL_ROWS = 5000;
+
+function dailyPricesDateIsNewerThanTail(sh, lastRow, date) {
+  var iso = /^\d{4}-\d{2}-\d{2}$/;
+  if (!iso.test(String(date))) return false;
+  var tz = Session.getScriptTimeZone();
+  var n = Math.min(DAILY_PRICES_TAIL_ROWS, lastRow - 1); // never include the header row
+  if (n < 1) return false;
+  var vals = sh.getRange(lastRow - n + 1, 3, n, 1).getValues(); // column C = Date
+  for (var i = 0; i < vals.length; i++) {
+    var cell = vals[i][0];
+    var s = (cell instanceof Date) ? Utilities.formatDate(cell, tz, "yyyy-MM-dd") : String(cell);
+    if (!iso.test(s)) return false;  // blank/odd cell in the tail: do not trust it, scan instead
+    if (s >= date) return false;     // date already present (or older than something present)
+  }
+  return true;
+}
+
 function appendDailyPrices(ss, rows, date) {
   var sh = getOrResetDailyPricesSheet(ss);
   var lastRow = sh.getLastRow();
-  if (lastRow >= 2) {
+  var path = "fast append";
+  if (lastRow >= 2 && !dailyPricesDateIsNewerThanTail(sh, lastRow, date)) {
+    path = "replace (scan)";
     var tz = Session.getScriptTimeZone();
     var values = sh.getRange(2, 3, lastRow - 1, 1).getValues(); // column C = Date
     var rowsToDelete = [];
@@ -1062,12 +1094,14 @@ function appendDailyPrices(ss, rows, date) {
     // 2026-10-09 with 758 of 963 rows and no re-insert. See deleteRowsBulk().
     deleteRowsBulk(sh, rowsToDelete);
   }
-  if (!rows.length) return;
+  if (!rows.length) return path;
   var startRow = sh.getLastRow() + 1;
   forceTextColumn(sh, startRow, rows.length, 1); // Ticker (col 1 here) -- see forceTextColumn()
   sh.getRange(startRow, 1, rows.length, DAILY_PRICES_HEADERS.length).setValues(rows);
   formatDailyPricesRows(sh, startRow, rows.length);
+  return path;
 }
+
 // ── Row-count audit for "Daily All Tickers" (stock_summary) ────────────────
 // One-off diagnostic: =COUNTA(C2:C) on this tab read 339405 against an
 // expected 339408 from the clean source parquet (0 duplicate (StockCode,Date)
