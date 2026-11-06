@@ -5,9 +5,10 @@ Run this AFTER `uv run idx daily` and `uv run idx corporate` have refreshed
 data/parquet/stock_summary.parquet and data/parquet/corporate_actions.parquet.
 Sector classification (used for the per-sector shortlist cap) comes from
 data/parquet/financial_ratios.parquet, refreshed by `uv run idx financial` +
-`uv run idx parquet` -- see the note above FIN_RATIOS_PATH below. NOTE: `idx financial` is fixed to
-the FY2024 Q4 statements (fetch_financial_ratios defaults year=2024, quarter=4), so it refreshes sector
-LABELS only; it does not advance the newest fsDate and adds no tickers listed since.
+`uv run idx parquet` -- see the note above FIN_RATIOS_PATH below. NOTE: until 05/11/2026 `idx financial`
+was hard-wired to the FY2024 Q4 statements (labels refreshed, fsDate stuck at 2024-10-31, no tickers listed
+since). It now defaults to the freshest period IDX serves (current year, then the previous one); adopted
+05/11/2026: 963 tickers, newest fsDate 2026-09-30.
 
 Usage:
     uv run python daily_screen.py
@@ -103,8 +104,8 @@ def load_sector_map():
     caveat = (f"Sector = IDX-IC classification from financial_ratios.parquet "
               f"(latest financial-statement date in that snapshot: {latest_fs.date() if pd.notna(latest_fs) else 'unknown'}). "
               f"That file is a periodic snapshot, not refreshed by the daily job -- tickers listed after that "
-              f"statement period show as 'Unclassified'; re-running `idx financial` does not add them (it is "
-              f"fixed to FY2024 Q4).")
+              f"statement period show as 'Unclassified' until `uv run idx financial` + `uv run idx parquet` are "
+              f"re-run (it fetches the freshest period IDX serves).")
     return sector_map, caveat
 
 
@@ -112,11 +113,11 @@ def sector_staleness_caveat(reference_date, n_unclassified=None, n_universe=None
                             n_unclassified_passers=None, n_passers=None):
     """Returns a WARNING string when the sector snapshot (financial_ratios.parquet) is older than
     SECTOR_STALE_DAYS relative to `reference_date` (age = reference_date minus the newest fsDate in
-    the file), else None. `uv run idx financial` + `uv run idx parquet` refreshes sector LABELS for
-    the same FY2024 Q4 statements (the command is fixed to that period): it can change sector
-    assignments and therefore the 2-per-sector shortlist cap, but it does not move the newest fsDate
-    and adds no new listings. The optional counts say how many tickers are 'Unclassified' (all of
-    them share one cap group of MAX_PER_SECTOR)."""
+    the file), else None. `uv run idx financial` + `uv run idx parquet` re-sources the snapshot from the
+    freshest period IDX serves (since 05/11/2026; before that the command was fixed to FY2024 Q4 and could
+    not move the date or add listings). Re-sourcing can change sector assignments and therefore the
+    2-per-sector shortlist cap. The optional counts say how many tickers are 'Unclassified' (all of them
+    share one cap group of MAX_PER_SECTOR)."""
     if not os.path.exists(FIN_RATIOS_PATH):
         return None
     fr = pd.read_parquet(FIN_RATIOS_PATH, columns=["fsDate"])
@@ -138,10 +139,9 @@ def sector_staleness_caveat(reference_date, n_unclassified=None, n_universe=None
     return (f"WARNING - STALE SECTOR SNAPSHOT: newest financial-statement date in financial_ratios.parquet is "
             f"{latest_fs.date()} ({fs_age} days before {ref.date()}, limit {SECTOR_STALE_DAYS}). The 2-per-sector "
             f"cap uses this classification, so a name that changed sector, or a newly listed one ('Unclassified'{uncl}), "
-            f"is capped on stale data. `uv run idx financial` + `uv run idx parquet` refreshes sector LABELS only: "
-            f"the command is fixed to the FY2024 Q4 statements, so it does not change this date and adds no new "
-            f"listings (clearing the warning needs a later reporting period). If you re-source, diff the shortlist "
-            f"before and after (a changed sector changes who survives the cap).")
+            f"is capped on stale data. To re-source: `uv run idx financial` then `uv run idx parquet` (the command "
+            f"fetches the freshest period IDX serves). Then diff the shortlist before and after (a changed sector "
+            f"changes who survives the cap).")
 
 
 def tick_size(price):
