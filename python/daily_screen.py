@@ -352,12 +352,18 @@ def run_screen(as_of_date=None):
         # True Range is capped at ATR_SPIKE_CAP_MULT x the median TR of the same 14 sessions.
         tr_vals = win_atr["TrueRange"].values
         atr_capped_pct = spike_share = spike_days = np.nan
+        atrs_below_high_capped = np.nan   # ATRsBelowHigh with the spike-capped ATR14 as the divisor (diagnostic only)
         if len(tr_vals) >= WINDOW_ATR and pd.notna(atr) and atr > 0:
             med_tr = float(np.median(tr_vals))
             if med_tr > 0:  # median of 0 means more than half the sessions had no range: cap is meaningless
                 cap = ATR_SPIKE_CAP_MULT * med_tr
                 capped_mean = float(np.minimum(tr_vals, cap).mean())
                 atr_capped_pct = capped_mean / last_price
+                # Same numerator as ATRsBelowHigh ((High20 - Close)), divisor = capped ATR14 in IDR.
+                # = DistToHigh20 / (ATR14_capped_pct * (1 - DistToHigh20)). Blank wherever the capped ATR is blank.
+                # DIAGNOSTIC ONLY: feeds no filter and no ranking (F3 and the sort still use ATRsBelowHigh).
+                if capped_mean > 0 and pd.notna(high_n):
+                    atrs_below_high_capped = (high_n - last_price) / capped_mean
                 spike_share = 1.0 - capped_mean / atr
                 spike_days = int((tr_vals > cap).sum())
 
@@ -376,6 +382,7 @@ def run_screen(as_of_date=None):
             BreakoutLast3=bool(breakout), ZeroTradeLast3=bool(zero_recent),
             EntryDayExcess=float(ede) if pd.notna(ede) else None,
             ATR14_capped_pct=float(atr_capped_pct) if pd.notna(atr_capped_pct) else None,
+            ATRsBelowHigh_capped=float(atrs_below_high_capped) if pd.notna(atrs_below_high_capped) else None,
             ATR_SpikeShare=float(spike_share) if pd.notna(spike_share) else None,
             ATR_SpikeDays=int(spike_days) if pd.notna(spike_days) else None,
             ATR_ticks=float(atr_ticks) if pd.notna(atr_ticks) else None,
@@ -543,6 +550,7 @@ def measurement_fields(r):
         ClosedAtARA=bool(r["ClosedAtARA"]),
         BookLockedAtARA=bool(r["BookLockedAtARA"]),
         ARA_days_last5=int(r["ARA_days_last5"]),
+        ATRsBelowHigh_capped=_num(r.get("ATRsBelowHigh_capped"), 3),   # last in the measurement block: nothing shifts
     )
 
 

@@ -1,7 +1,7 @@
 # IDX Shortlist Backtest Kit
 
 Answers: does the daily shortlist's LastPrice rise more than the market (^JKSE)
-over the following 5 / 10 / 20 trading days?
+over the following 3 / 5 / 7 / 10 / 14 / 20 trading days?
 
 Last full run: 16/10/2026. Results and sensitivities live in the Google Sheet
 tab `Backtest_Results`; this folder holds the code and inputs needed to rebuild
@@ -25,6 +25,12 @@ Tracked in git:
 - `compute_backtest.py` -- forward returns, hit rate, mean / median, excess
   versus ^JKSE. Standard library only. Formula, worked example and assumptions
   are in its docstring: read that before trusting any number.
+- `backtest_analysis.py` -- rebuilds every table in the Sheet tab `Backtest_Results`
+  (sections 1-5 at all six horizons, 1b overlap-corrected inference, 1c cost-adjusted
+  excess). Reads `idx_price_history.csv` and `screen_log_export.csv` directly (not the
+  row-detail file), needs pandas + numpy, writes `backtest_results_tab.json`
+  (regenerable). Formulas for Newey-West, the moving-block bootstrap and the cost model
+  are in its docstring. Reproduces `backtest_row_detail.csv` to <0.001pp.
 - `tickers_needed.csv` -- every ticker that ever appeared in Screen_Log
   (373 incl. `TRUE` = Triniti Dinamik) plus `^JKSE`, with earliest / latest
   screen date. Documentation of why the fetch window was chosen.
@@ -48,6 +54,7 @@ Git-ignored (large or regenerable; see `.gitignore`):
     pip install yfinance --upgrade     # skip if already installed
     python fetch_idx_prices.py         # ~4 minutes for ~375 symbols
     python compute_backtest.py
+    python backtest_analysis.py        # tables for the Backtest_Results tab
 
 1. Re-export Screen_Log to `screen_log_export.csv` first if the Sheet has new
    rows since the last run.

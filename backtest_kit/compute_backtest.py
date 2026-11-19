@@ -91,7 +91,7 @@ from collections import defaultdict
 SCREEN_LOG_FILE = "screen_log_export.csv"
 PRICE_FILE = "idx_price_history.csv"
 BENCHMARK_TICKER = "^JKSE"
-HORIZONS = [5, 10, 20]
+HORIZONS = [3, 5, 7, 10, 14, 20]
 
 ROW_DETAIL_OUT = "backtest_row_detail.csv"
 SUMMARY_OUT = "backtest_summary.csv"

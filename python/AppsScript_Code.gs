@@ -79,8 +79,11 @@ var LEGACY_SHORTLIST_TAB_NAME = "Latest_Top8";
 //   ClosedAtARA         Close equals that ceiling (price fact only)
 //   BookLockedAtARA     ...AND no offers left and a bid sitting at the ceiling (end-of-day book)
 //   ARA_days_last5      sessions among the last 5 that closed at ARA
+//   ATRsBelowHigh_capped (added 19/11/2026) (High20 - LastPrice) / capped ATR14 in IDR -- ATRsBelowHigh with the spike-capped ATR as
+//                       the divisor. Diagnostic only: the F3 gate and the Shortlist ranking still use ATRsBelowHigh. Last in the block so no column moves.
 var MEASURE_HEADERS = ["EntryDayExcess", "ATR14_capped_pct", "ATR_SpikeShare", "ATR_SpikeDays", "ATR_ticks",
-                        "ATR_LowConfidence", "ARA_price", "ClosedAtARA", "BookLockedAtARA", "ARA_days_last5"];
+                        "ATR_LowConfidence", "ARA_price", "ClosedAtARA", "BookLockedAtARA", "ARA_days_last5",
+                        "ATRsBelowHigh_capped"];
 
 var TOP_HEADERS = ["RunDate", "LastTradingDate", "Ticker", "Name", "Sector", "LastPrice", "LotCost",
                     "ADTV20", "ATR14_pct", "High20", "DistToHigh20", "ATRsBelowHigh", "BreakoutLast3", "Source"
@@ -118,7 +121,8 @@ var NEARMISS_HEADERS = ["RunDate", "Ticker", "Name", "ADTV20", "FailedFilters", 
 // The MEASURE_HEADERS values for one record, in header order (null -> blank cell).
 function measureValues(r) {
   return [r.EntryDayExcess, r.ATR14_capped_pct, r.ATR_SpikeShare, r.ATR_SpikeDays, r.ATR_ticks,
-          r.ATR_LowConfidence, r.ARA_price, r.ClosedAtARA, r.BookLockedAtARA, r.ARA_days_last5];
+          r.ATR_LowConfidence, r.ARA_price, r.ClosedAtARA, r.BookLockedAtARA, r.ARA_days_last5,
+          r.ATRsBelowHigh_capped];
 }
 
 // Number formats for the MEASURE_HEADERS block starting at column `firstCol`.
@@ -131,6 +135,7 @@ function formatMeasureColumns(sh, startRow, numRows, firstCol) {
   sh.getRange(startRow, firstCol + 4, numRows, 1).setNumberFormat("0.0");     // ATR_ticks
   sh.getRange(startRow, firstCol + 6, numRows, 1).setNumberFormat("#,##0");   // ARA_price
   sh.getRange(startRow, firstCol + 9, numRows, 1).setNumberFormat("0");       // ARA_days_last5
+  sh.getRange(startRow, firstCol + 10, numRows, 1).setNumberFormat("0.00");   // ATRsBelowHigh_capped
 }
 
 // Column colors used consistently across tabs.
@@ -695,6 +700,7 @@ function buildGuideTab(ss) {
     ["ClosedAtARA", "TRUE when the stock CLOSED exactly at its ARA price (and above the previous close). A price fact only: it does not say whether sellers were still present.", "Close = ARA_price AND Close > Previous.", ""],
     ["BookLockedAtARA", "TRUE when it closed at ARA AND the end-of-day order book was locked: no offers left and a bid sitting at the ARA price. A stock can close at ARA without being locked (HATM, 20/10/2026: closed at 665 with 381,300 shares still offered at 665 and the best bid back at 660).", "ClosedAtARA AND Offer volume = 0 AND Bid = ARA_price AND Bid volume > 0.", ""],
     ["ARA_days_last5", "Number of the last 5 sessions (including LastTradingDate) that closed at ARA -- repeated limit-up closes.", "COUNT(ClosedAtARA) over the last 5 sessions.", ""],
+    ["ATRsBelowHigh_capped", "Diagnostic column, added 19/11/2026. ATRsBelowHigh with the spike-capped ATR14 as the divisor, so one outsized session (a gap, an ARA/ARB day) cannot make a stock look closer to its high than it is. Compare with ATRsBelowHigh: a large gap between the two means the headline ATR is carried by a few sessions. It feeds NO filter and NO ranking -- F3 and the Shortlist order still use ATRsBelowHigh. Last column on the three tabs that carry it; blank when ATR14_capped_pct is blank.", "(High20 − LastPrice) / (ATR14_capped_pct × LastPrice) = DistToHigh20 / (ATR14_capped_pct × (1 − DistToHigh20)).", ""],
     ["MissDistance", "(Near_Misses only) How far the ticker is from passing the ONE filter it failed, as a relative shortfall against that filter's threshold (0.10 = 10% short). Near_Misses is ordered by this, smallest first; binary misses (F4, F5) have no distance, are left blank and sort last. One normalisation among several: shortfalls of different filters are not strictly comparable.", "F1: (5bn − ADTV20)/5bn. F2: distance outside 50–3,000 relative to the bound crossed. F3: the larger of the ATR14 shortfall vs 3% and the branch miss (ATRsBelowHigh vs 1.0 after a breakout, else DistToHigh20 vs 5%).", ""],
   ];
   sh.getRange(row, 1, colDefs.length, 4).setValues(colDefs).setWrap(true).setVerticalAlignment("top");
