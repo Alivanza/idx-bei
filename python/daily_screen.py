@@ -507,11 +507,14 @@ def run_screen(as_of_date=None):
         )
         if stale:
             caveats.insert(0, stale)
-    # Standing caveat (item 2d of the 03/11/2026 audit): the regime split is not testable.
+    # Standing caveat (item 2d of the 03/11/2026 audit; rewritten 20/11/2026 once Backtest_Results section 8 existed).
     caveats.append(
-        "REGIME SPLIT NOT TESTABLE: short selling resumed 15/09/2026 (per BCA Sekuritas), but Backtest_Results only "
-        "contains screen dates through 2026-09-10 (later days lack complete forward windows), so a before/after "
-        "2026-10-01 comparison has no post-period sample. Read Backtest_Results as pre-resumption evidence only."
+        "REGIME SPLIT (Backtest_Results section 8): short selling resumed 15/09/2026 (per BCA Sekuritas). Post-resumption "
+        "screen dates now have forward windows. Using only windows that end by 01/11/2026 (Layer 1), the post sample is "
+        "30 / 28 / 26 dates at 3 / 5 / 7d with net A -0.97 / -0.41 / +0.86pp (Newey-West t -0.95 / -0.24 / +0.37, none "
+        "distinguishable from zero); 10d and longer are withheld (fewer than 3 independent windows). The post sample sits "
+        "inside the October 2026 crash and rebound, so it is a single-regime test and cannot separate a short-selling "
+        "effect from that episode. Figures are as of the 19/11/2026 Backtest_Results generation."
     )
     if bench_ret is None:
         caveats.append(f"EntryDayExcess blank this run: no ^JKSE return found for {pd.Timestamp(last_date).date()} "
